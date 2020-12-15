@@ -14,3 +14,25 @@
 
 
 #include "linenoise.h"
+
+int main(int argc, char* argv[]) {
+    if (argc < 2) {
+        std::cerr << "Please specify the name of the program that you want to debug.\nExiting...\n";
+        return -1;
+    }
+
+    auto prog = argv[1];
+
+    auto pid = fork();
+    if (pid == 0) {
+        //child
+        personality(ADDR_NO_RANDOMIZE);
+        execute_debugee(prog);
+    }
+    else if (pid >= 1)  {
+        //parent
+        std::cout << "Started debugging process " << pid << '\n';
+        debugger dbg{prog, pid};
+        dbg.run();
+    }
+}
