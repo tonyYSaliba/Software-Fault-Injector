@@ -40,6 +40,44 @@ void debugger::handle_command(const std::string& line) {
         std::string addr {args[1], 2}; //naively assume that the user has written 0xADDRESS
         set_breakpoint_at_address(std::stol(addr, 0, 16));
     }
+    else if(is_prefix(command, "Y1")) {
+        unsigned int i=0;
+        while(true){
+            ptrace(PTRACE_SINGLESTEP, m_pid, nullptr, nullptr);
+            int wait_status;
+            auto options = 0;
+            if(!waitpid(m_pid, &wait_status, options)){
+                std::cout << "End of program\n";
+                std::cout << i << std::endl;
+                break;
+            }
+            
+        }
+    }
+    else if(is_prefix(command, "Y2")) {
+        ptrace(PTRACE_CONT, m_pid, nullptr, nullptr);
+
+        int wait_status;
+        auto options = 0;
+         if(waitpid(m_pid, &wait_status, options) == m_pid){
+             std::cout << "waitpid() success"<< std::endl;
+         }
+         if(WIFEXITED(wait_status)){
+            std::cout << "Exited"<< std::endl;
+         }
+         else if(WIFSIGNALED(wait_status)){
+            std::cout << "Signaled"<< std::endl;
+         }
+         else if(WIFSTOPPED(wait_status)){
+            std::cout << "Stopped"<< std::endl;
+         }
+         else if(WIFCONTINUED(wait_status)){
+            std::cout << "Continued"<< std::endl;
+         }
+         
+         std::cout << "status: "<<wait_status<< std::endl;
+
+    }
     else {
         std::cerr << "Unknown command\n";
     }
