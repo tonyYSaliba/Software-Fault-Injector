@@ -537,9 +537,12 @@ void debugger::set_breakpoint_at_function(const std::string& name) {
         for (const auto& die : cu.root()) {
             if (die.has(dwarf::DW_AT::name) && at_name(die) == name) {
                 auto low_pc = at_low_pc(die);
+                auto high_pc = at_high_pc(die);
                 auto entry = get_line_entry_from_pc(low_pc);
                 ++entry; //skip prologue
                 set_breakpoint_at_address(offset_dwarf_address(entry->address));
+                auto exit = get_line_entry_from_pc(high_pc);
+                set_breakpoint_at_source_line(at_name(cu.root()), exit->line-1);
             }
         }
     }
