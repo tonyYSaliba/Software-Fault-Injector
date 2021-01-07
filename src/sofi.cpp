@@ -639,13 +639,6 @@ void debugger::set_breakpoint_at_address(std::intptr_t addr) {
 void debugger::run() {
     wait_for_signal();
     initialise_load_address();
-
-    char* line = nullptr;
-    while((line = linenoise("sofi> ")) != nullptr) {
-        handle_command(line);
-        linenoiseHistoryAdd(line);
-        linenoiseFree(line);
-    }
 }
 
 void execute_debugee (const std::string& prog_name) {
