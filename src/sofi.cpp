@@ -599,6 +599,23 @@ void debugger::set_breakpoint_at_source_line(const std::string& file, unsigned l
     }
 }
 
+void debugger::get_alligned_address(std::intptr_t& addr) {
+    for (const auto& cu : m_dwarf.compilation_units()) {
+        
+        const auto& lt = cu.get_line_table();
+
+        for (const auto& entry : lt) {
+            if (entry.is_stmt && offset_dwarf_address(entry.address)>=addr) {
+                addr = offset_dwarf_address(entry.address);
+                return;
+            }
+        }
+        
+    }
+}
+
+
+
 void debugger::set_breakpoint_at_address(std::intptr_t addr) {
     std::cout << "Set breakpoint at address 0x" << std::hex << addr << std::endl;
     breakpoint bp {m_pid, addr};
