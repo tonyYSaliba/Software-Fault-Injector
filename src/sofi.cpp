@@ -52,7 +52,7 @@ void debugger::read_variables() {
     auto func = get_function_from_pc(get_offset_pc());
 
     for (const auto& die : func) {
-        if (die.tag == DW_TAG::variable) {
+        if (die.tag == DW_TAG::variable || die.tag == DW_TAG::formal_parameter) {
             auto loc_val = die[DW_AT::location];
 
             //only supports exprlocs for now
