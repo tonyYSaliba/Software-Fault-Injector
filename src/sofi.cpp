@@ -334,6 +334,10 @@ siginfo_t debugger::get_signal_info() {
     return info;
 }
 
+void debugger::single_step() {
+    ptrace(PTRACE_SINGLESTEP, m_pid, nullptr, nullptr);
+}
+
 void debugger::step_over_breakpoint() {
     if (m_breakpoints.count(get_pc())) {
         auto& bp = m_breakpoints[get_pc()];
