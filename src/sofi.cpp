@@ -548,6 +548,42 @@ void debugger::set_breakpoint_at_function(const std::string& name) {
     }
 }
 
+void debugger::get_function_start_and_end_addresses(const std::string& name, std::intptr_t& start_addr, std::intptr_t& end_addr) { 
+    for (const auto& cu : m_dwarf.compilation_units()) {
+        for (const auto& die : cu.root()) {
+            if (die.has(dwarf::DW_AT::name) && at_name(die) == name) {
+                auto low_pc = at_low_pc(die);
+                auto high_pc = at_high_pc(die);
+                auto entry = get_line_entry_from_pc(low_pc);
+                ++entry; //skip prologue
+                start_addr = offset_dwarf_address(entry->address);
+                auto exit = get_line_entry_from_pc(high_pc);
+
+                std::string file =  at_name(cu.root());
+                int line = exit->line-1;
+                bool status = false;
+                while(!status){
+                    for (const auto& cu : m_dwarf.compilation_units()) {
+                        if (is_suffix(file, at_name(cu.root()))) {
+                            const auto& lt = cu.get_line_table();
+
+                            for (const auto& entry : lt) {
+                                if (entry.is_stmt && entry.line == line) {
+                                    end_addr = offset_dwarf_address(entry.address);
+                                    status = true;
+                                }
+                            }
+                        }
+                    }
+                    line = line - 1;
+                }
+            }
+        }
+    }
+}
+
+
+
 void debugger::set_breakpoint_at_source_line(const std::string& file, unsigned line) {
     for (const auto& cu : m_dwarf.compilation_units()) {
         if (is_suffix(file, at_name(cu.root()))) {
