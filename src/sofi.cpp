@@ -394,6 +394,12 @@ void debugger::continue_execution() {
     wait_for_signal();
 }
 
+void debugger::continue_execution_single_step() {
+    step_over_breakpoint();
+    single_step();
+    wait_for_signal();
+}
+
 void debugger::dump_registers() {
     for (const auto& rd : g_register_descriptors) {
         std::cout << rd.name << " 0x"
