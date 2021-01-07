@@ -18,7 +18,7 @@
 #include "debugger.hpp"
 #include "registers.hpp"
 
-using namespace minidbg;
+using namespace sofi;
 
 class ptrace_expr_context : public dwarf::expr_context {
 public:
@@ -564,7 +564,7 @@ void debugger::run() {
     initialise_load_address();
 
     char* line = nullptr;
-    while((line = linenoise("minidbg> ")) != nullptr) {
+    while((line = linenoise("sofi> ")) != nullptr) {
         handle_command(line);
         linenoiseHistoryAdd(line);
         linenoiseFree(line);

@@ -1,10 +1,10 @@
-#ifndef MINIDBG_BREAKPOINT_HPP
-#define MINIDBG_BREAKPOINT_HPP
+#ifndef SOFI_BREAKPOINT_HPP
+#define SOFI_BREAKPOINT_HPP
 
 #include <cstdint>
 #include <sys/ptrace.h>
 
-namespace minidbg {
+namespace sofi {
     class breakpoint {
     public:
         breakpoint() = default;

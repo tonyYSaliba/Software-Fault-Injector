@@ -1,10 +1,10 @@
-#ifndef MINIDBG_REGISTERS_HPP
-#define MINIDBG_REGISTERS_HPP
+#ifndef SOFI_REGISTERS_HPP
+#define SOFI_REGISTERS_HPP
 
 #include <sys/user.h>
 #include <algorithm>
 
-namespace minidbg {
+namespace sofi {
     enum class reg {
         rax, rbx, rcx, rdx,
         rdi, rsi, rbp, rsp,

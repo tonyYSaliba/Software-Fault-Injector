@@ -1,5 +1,5 @@
-#ifndef MINIDBG_DEBUGGER_HPP
-#define MINIDBG_DEBUGGER_HPP
+#ifndef SOFI_DEBUGGER_HPP
+#define SOFI_DEBUGGER_HPP
 
 #include <utility>
 #include <string>
@@ -10,7 +10,7 @@
 #include "dwarf/dwarf++.hh"
 #include "elf/elf++.hh"
 
-namespace minidbg {
+namespace sofi {
     enum class symbol_type {
         notype,            // No type (e.g., absolute symbol)
         object,            // Data object
