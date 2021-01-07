@@ -343,9 +343,6 @@ void debugger::step_over_breakpoint() {
         auto& bp = m_breakpoints[get_pc()];
         if (bp.is_enabled()) {
             bp.disable();
-            ptrace(PTRACE_SINGLESTEP, m_pid, nullptr, nullptr);
-            wait_for_signal();
-            bp.enable();
         }
     }
 }
