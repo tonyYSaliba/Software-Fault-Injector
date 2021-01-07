@@ -663,12 +663,55 @@ void execute_debugee (const std::string& prog_name) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc < 2) {
-        std::cerr << "Program name not specified";
-        return -1;
+    
+    string prog = "";
+    string functionName = "";
+    string fileName = "";
+    int inputType = 0; 
+    int L1 = 0;
+    int L2 = 0;
+    string injectionType = "";
+    int numberOfTests = 0;
+
+    do{
+        cout    << "Please enter name of the program that you want to debug..." << endl;
+        cin     >> prog;
+    }while(prog == "");
+
+    do{
+        cout    << "Please enter how you want to inject..." << endl;
+        cout    << "Between lines L1 and L2 ?[1] or inside a function f ?[2]";
+        cin     >> inputType;
+    }while(inputType == 0);
+
+    
+    if(inputType == 1){
+        do{
+            cout    << "Please enter file name..." << endl;
+            cin     >> fileName;
+            cout    << "Please enter Line 1..." << endl;
+            cin     >> L1;
+            cout    << "Please enter Line 2..." << endl;
+            cin     >> L2;
+        }while(L1 == 0 || L2 == 0 || fileName == "");
+    }
+    else if(inputType == 2){
+        do{
+            cout    << "Please enter name of the function that you want to debug..." << endl;
+            cin     >> functionName;
+        }while(functionName == "");
     }
 
-    auto prog = argv[1];
+
+    do{
+        cout    << "Please enter Injection type..." << endl;
+        cin     >> injectionType;
+    }while(injectionType == "");
+
+    // do{
+    //     cout    << "Please enter the number of error injections to be performed..." << endl;
+    //     cin     >>  numberOfTests;
+    // }while(numberOfTests<0);
 
     auto pid = fork();
     if (pid == 0) {
@@ -681,5 +724,38 @@ int main(int argc, char* argv[]) {
         std::cout << "Started debugging process " << pid << '\n';
         debugger dbg{prog, pid};
         dbg.run();
+        intptr_t addr1;
+        intptr_t addr2;
+        intptr_t addr;
+
+        if(inputType == 1){
+            dbg.get_address_at_source_line(fileName, L1, addr1);
+            dbg.get_address_at_source_line(fileName, L2, addr2);
+            addr = addr1 + rand() % ((addr2 - addr1) +1);
+            dbg.get_alligned_address(addr);
+        }
+        else if (inputType == 2){
+            dbg.get_function_start_and_end_addresses(functionName,addr1, addr2);
+            addr = addr1 + rand() % ((addr2 - addr1) +1);
+            dbg.get_alligned_address(addr);
+        }
+
+        if (injectionType == "Opcode"){
+            dbg.mutate_opcode(addr);
+        }
+        else if (injectionType == "Data"){
+            dbg.mutate_register(addr);
+        }
+        else if (injectionType == "test1"){
+            dbg.set_breakpoint_at_address(addr);
+            dbg.continue_execution();
+            // dbg.read_variables();
+            cout<<"offset: "<<dbg.get_offset_pc()<<endl;
+            dbg.get_function_from_pc(dbg.get_pc());
+        }
+        dbg.continue_execution();
+
     }
+    cout<<"pid "<<pid<<" exited;"<<endl;
+    return 0;
 }
