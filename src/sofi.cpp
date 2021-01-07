@@ -750,8 +750,8 @@ int main(int argc, char* argv[]) {
             dbg.set_breakpoint_at_address(addr);
             dbg.continue_execution();
             // dbg.read_variables();
-            cout<<"offset: "<<dbg.get_offset_pc()<<endl;
-            dbg.get_function_from_pc(dbg.get_pc());
+            cout<<"pc: "<<dbg.get_pc()<<endl;
+            // dbg.get_function_from_pc(dbg.get_pc());
         }
         dbg.continue_execution();
 
