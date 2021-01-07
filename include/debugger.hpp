@@ -62,7 +62,16 @@ namespace sofi {
         void step_out();
         void remove_breakpoint(std::intptr_t addr);
 
-    private:
+        void get_address_at_source_line(const std::string& file, unsigned line, intptr_t& addr);
+        void single_step(); 
+        void get_function_start_and_end_addresses(const std::string& name, std::intptr_t& start_addr, std::intptr_t& end_addr);
+        void get_alligned_address(std::intptr_t& addr);
+        void continue_execution_single_step();
+        void mutate_register(std::intptr_t addr);
+        void mutate_opcode(std::intptr_t addr);
+
+
+    // private:
         void handle_command(const std::string& line);
         void continue_execution();
         auto get_pc() -> uint64_t;
