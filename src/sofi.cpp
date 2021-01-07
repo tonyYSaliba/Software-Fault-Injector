@@ -646,6 +646,14 @@ void debugger::mutate_opcode(std::intptr_t addr) {
     write_memory(addr, (read_memory(addr) & ~0xFF)|randomOpcode);
 }
 
+void debugger::mutate_register(std::intptr_t addr) {
+    set_breakpoint_at_address(addr);
+    continue_execution();
+    int randomRegister = rand() % 27 ;
+    int randomValue = rand();
+    set_register_value(m_pid, get_register_from_name(g_register_descriptors[randomRegister].name), randomValue);
+}
+
 void execute_debugee (const std::string& prog_name) {
     if (ptrace(PTRACE_TRACEME, 0, 0, 0) < 0) {
         std::cerr << "Error in ptrace\n";
