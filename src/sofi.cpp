@@ -641,6 +641,11 @@ void debugger::run() {
     initialise_load_address();
 }
 
+void debugger::mutate_opcode(std::intptr_t addr) {
+    int randomOpcode = rand() % 0xFF;   
+    write_memory(addr, (read_memory(addr) & ~0xFF)|randomOpcode);
+}
+
 void execute_debugee (const std::string& prog_name) {
     if (ptrace(PTRACE_TRACEME, 0, 0, 0) < 0) {
         std::cerr << "Error in ptrace\n";
