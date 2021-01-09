@@ -69,7 +69,7 @@ namespace sofi {
         void continue_execution_single_step();
         void mutate_register(std::intptr_t addr);
         void mutate_opcode(std::intptr_t addr);
-
+        dwarf::die get_function_from_name(const std::string& name);
 
     // private:
         void handle_command(const std::string& line);

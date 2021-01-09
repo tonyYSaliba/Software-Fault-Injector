@@ -1,3 +1,4 @@
+#include<iostream>
 void a() {
     int foo = 1;
 }

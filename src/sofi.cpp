@@ -94,7 +94,7 @@ void debugger::print_backtrace() {
                   << ' ' << dwarf::at_name(func) << std::endl;
     };
 
-    auto current_func = get_function_from_pc(offset_load_address(get_pc()));
+    auto current_func = get_function_from_pc(get_offset_pc());
     output_frame(current_func);
 
     auto frame_pointer = get_register_value(m_pid, reg::rbp);
@@ -277,6 +277,20 @@ dwarf::die debugger::get_function_from_pc(uint64_t pc) {
 
     throw std::out_of_range{"Cannot find function"};
 }
+
+dwarf::die debugger::get_function_from_name(const std::string& name) {
+    for (const auto& cu : m_dwarf.compilation_units()) {
+        for (const auto& die : cu.root()) {
+            if (die.has(dwarf::DW_AT::name) && at_name(die) == name) {
+                return die;
+            }
+        }
+    }
+
+    throw std::out_of_range{"Cannot find function"};
+}
+
+
 
 dwarf::line_table::iterator debugger::get_line_entry_from_pc(uint64_t pc) {
     for (auto &cu : m_dwarf.compilation_units()) {
@@ -751,7 +765,10 @@ int main(int argc, char* argv[]) {
             dbg.continue_execution();
             // dbg.read_variables();
             cout<<"pc: "<<dbg.get_pc()<<endl;
-            // dbg.get_function_from_pc(dbg.get_pc());
+            // dbg.offset_load_address(get_pc());
+            // dbg.get_function_from_name(functionName);
+            dbg.get_function_from_pc(dbg.get_offset_pc());
+            // dbg.print_backtrace();
         }
         dbg.continue_execution();
 
