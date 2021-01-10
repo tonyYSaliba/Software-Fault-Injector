@@ -692,8 +692,7 @@ void debugger::mutate_data(std::intptr_t addr){
     uint64_t* variables = new uint64_t[100];
     read_variables(variables, size);
     int i = rand() % size;
-    i=1;
-    write_memory(variables[i], ((~0xF)&(read_memory(variables[i]))) | ~(0xF&(read_memory(variables[i]))) );
+    write_memory(variables[i], ((~0xFF)&(read_memory(variables[i]))) | ~(0xFF&(read_memory(variables[i]))) );
     // cout<<(variables[i]) <<": "<<~dbg.read_memory( (variables[i]))<<"; ";
 }
 
@@ -706,6 +705,8 @@ void execute_debugee (const std::string& prog_name) {
 }
 
 int main(int argc, char* argv[]) {
+
+    srand(time(0));
     
     string prog = "";
     string functionName = "";
