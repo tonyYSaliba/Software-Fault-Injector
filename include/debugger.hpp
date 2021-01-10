@@ -51,7 +51,7 @@ namespace sofi {
         void set_breakpoint_at_source_line(const std::string& file, unsigned line);
         void dump_registers();
         void print_backtrace();
-        void read_variables();
+        void read_variables(uint64_t* variables, int&size);
         void print_source(const std::string& file_name, unsigned line, unsigned n_lines_context=2);
         auto lookup_symbol(const std::string& name) -> std::vector<symbol>;
 
@@ -70,6 +70,7 @@ namespace sofi {
         void mutate_register(std::intptr_t addr);
         void mutate_opcode(std::intptr_t addr);
         dwarf::die get_function_from_name(const std::string& name);
+        void mutate_data(std::intptr_t addr);
 
     // private:
         void handle_command(const std::string& line);

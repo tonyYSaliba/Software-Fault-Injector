@@ -7,6 +7,7 @@
 #include <fstream>
 #include <iostream>
 #include <iomanip>
+#include <vector>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -46,7 +47,7 @@ private:
     uint64_t m_load_address;
 };
 template class std::initializer_list<dwarf::taddr>;
-void debugger::read_variables() {
+void debugger::read_variables(uint64_t* variables, int&size) {
     using namespace dwarf;
 
     auto func = get_function_from_pc(get_offset_pc());
@@ -65,14 +66,18 @@ void debugger::read_variables() {
                 {
                     auto offset_addr = result.value;
                     auto value = read_memory(offset_addr);
-                    std::cout << at_name(die) << " (0x" << std::hex << offset_addr << ") = " << value << std::endl;
+                    variables[size] = offset_addr;
+                    size++;
+                    // std::cout << at_name(die) << " (0x" << std::hex << offset_addr << ") = " << value << std::endl;
                     break;
                 }
 
                 case expr_result::type::reg:
                 {
                     auto value = get_register_value_from_dwarf_register(m_pid, result.value);
-                    std::cout << at_name(die) << " (reg " << result.value << ") = " << value << std::endl;
+                    variables[size] = result.value;
+                    size ++;
+                    // std::cout << at_name(die) << " (reg " << result.value << ") = " << value << std::endl;
                     break;
                 }
 
@@ -529,7 +534,7 @@ void debugger::handle_command(const std::string& line) {
     }
 
     else if(is_prefix(command, "variables")) {
-        read_variables();
+        // read_variables();
     }
 
     else if(is_prefix(command, "backtrace")) {
@@ -679,6 +684,19 @@ void debugger::mutate_register(std::intptr_t addr) {
     set_register_value(m_pid, get_register_from_name(g_register_descriptors[randomRegister].name), randomValue);
 }
 
+void debugger::mutate_data(std::intptr_t addr){
+
+    set_breakpoint_at_address(addr);
+    continue_execution();
+    int size = 0;
+    uint64_t* variables = new uint64_t[100];
+    read_variables(variables, size);
+    int i = rand() % size;
+    i=1;
+    write_memory(variables[i], ((~0xF)&(read_memory(variables[i]))) | ~(0xF&(read_memory(variables[i]))) );
+    // cout<<(variables[i]) <<": "<<~dbg.read_memory( (variables[i]))<<"; ";
+}
+
 void execute_debugee (const std::string& prog_name) {
     if (ptrace(PTRACE_TRACEME, 0, 0, 0) < 0) {
         std::cerr << "Error in ptrace\n";
@@ -768,18 +786,11 @@ int main(int argc, char* argv[]) {
         if (injectionType == "Opcode"){
             dbg.mutate_opcode(addr);
         }
-        else if (injectionType == "Data"){
+        else if (injectionType == "Register"){
             dbg.mutate_register(addr);
         }
-        else if (injectionType == "test1"){
-            dbg.set_breakpoint_at_address(addr);
-            dbg.continue_execution();
-            dbg.read_variables();
-            // cout<<"pc: "<<dbg.get_pc()<<endl;
-            // dbg.offset_load_address(get_pc());
-            // dbg.get_function_from_name(functionName);
-            // dbg.get_function_from_pc(dbg.get_offset_pc());
-            // dbg.print_backtrace();
+        else if (injectionType == "Data"){
+            dbg.mutate_data(addr);
         }
         dbg.continue_execution();
 
