@@ -267,8 +267,19 @@ dwarf::die debugger::get_function_from_pc(uint64_t pc) {
         if (die_pc_range(cu.root()).contains(pc)) {
             for (const auto& die : cu.root()) {
                 if (die.tag == dwarf::DW_TAG::subprogram) {
-                    if (die_pc_range(die).contains(pc)) {
-                        return die;
+                    bool status;
+                    try{
+                        status = true;
+                        at_low_pc(die);
+                        at_high_pc(die);
+                    }
+                    catch(exception e){
+                        status = false;
+                    }
+                    if(status){
+                        if (at_low_pc(die)<=pc && pc<= at_high_pc(die)) {
+                            return die;
+                        }                    
                     }
                 }
             }
@@ -763,11 +774,11 @@ int main(int argc, char* argv[]) {
         else if (injectionType == "test1"){
             dbg.set_breakpoint_at_address(addr);
             dbg.continue_execution();
-            // dbg.read_variables();
-            cout<<"pc: "<<dbg.get_pc()<<endl;
+            dbg.read_variables();
+            // cout<<"pc: "<<dbg.get_pc()<<endl;
             // dbg.offset_load_address(get_pc());
             // dbg.get_function_from_name(functionName);
-            dbg.get_function_from_pc(dbg.get_offset_pc());
+            // dbg.get_function_from_pc(dbg.get_offset_pc());
             // dbg.print_backtrace();
         }
         dbg.continue_execution();
