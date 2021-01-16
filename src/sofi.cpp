@@ -712,6 +712,7 @@ int main(int argc, char* argv[]) {
 
     srand(time(0));
     
+    int num = 0;
     string prog = "";
     string functionName = "";
     string fileName = "";
@@ -755,6 +756,11 @@ int main(int argc, char* argv[]) {
         cout    << "Please enter Injection type..." << endl;
         cin     >> injectionType;
     }while(injectionType == "");
+
+    do{
+        cout    << "Please enter number of injections..." << endl;
+        cin     >> num;
+    }while(num <= 0);
 
     // do{
     //     cout    << "Please enter the number of error injections to be performed..." << endl;
