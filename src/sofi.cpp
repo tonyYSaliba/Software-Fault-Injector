@@ -9,6 +9,10 @@
 #include <iomanip>
 #include <vector>
 
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -757,14 +761,34 @@ int main(int argc, char* argv[]) {
     //     cin     >>  numberOfTests;
     // }while(numberOfTests<0);
 
+    int filedesOut[2];
+    int filedesErr[2];
+
+    if (pipe(filedesOut) == -1) {
+        perror("pipe");
+        exit(1);
+    }
+    if (pipe(filedesErr) == -1) {
+        perror("pipe");
+        exit(1);
+    }
+
     auto pid = fork();
     if (pid == 0) {
-        //child
+        //child         STDERR_FILENO       STDERR_FILENO
+        while ((dup2(filedesOut[1], STDOUT_FILENO) == -1) && (errno == EINTR)) {}
+        while ((dup2(filedesErr[1], STDERR_FILENO) == -1) && (errno == EINTR)) {}
+        close(filedesOut[1]);
+        close(filedesOut[0]);
+        close(filedesErr[1]);
+        close(filedesErr[0]);
         personality(ADDR_NO_RANDOMIZE);
         execute_debugee(prog);
     }
     else if (pid >= 1)  {
         //parent
+        close(filedesOut[1]);
+        close(filedesErr[1]);
         std::cout << "Started debugging process " << pid << '\n';
         debugger dbg{prog, pid};
         dbg.run();
@@ -793,8 +817,61 @@ int main(int argc, char* argv[]) {
         else if (injectionType == "Data"){
             dbg.mutate_data(addr);
         }
-        dbg.continue_execution();
+        else if (injectionType == "test"){
 
+        }
+        close(filedesOut[1]);
+        close(filedesErr[1]);
+
+        char bufferOut[4096];
+        char bufferErr[4096];
+
+        dbg.continue_execution();
+        while (1) { // read stdout
+            ssize_t count = read(filedesOut[0], bufferOut, sizeof(bufferOut));
+            if (count == -1) {
+                if (errno == EINTR) {
+                    continue;
+                } 
+                else {
+                    perror("read");
+                    exit(1);
+                }
+            } 
+            else if (count == 0) {
+                break;
+            } 
+            // else {
+            //     for (int i=0; i<count; i++){
+            //         cout<<bufferOut[i];
+            //     }
+            //     cout<<endl;
+            // }
+        }
+        close(filedesOut[0]);
+
+        while (1) { // read stdErr
+            ssize_t count = read(filedesErr[0], bufferErr, sizeof(bufferErr));
+            if (count == -1) {
+                if (errno == EINTR) {
+                    continue;
+                } 
+                else {
+                    perror("read");
+                    exit(1);
+                }
+            } 
+            else if (count == 0) {
+                break;
+            } 
+            // else {
+            //     for (int i=0; i<count; i++){
+            //         cout<<"#"<<bufferErr[i];
+            //     }
+            //     cout<<endl;
+            // }
+        }
+        close(filedesErr[0]);
     }
     cout<<"pid "<<pid<<" exited;"<<endl;
     return 0;

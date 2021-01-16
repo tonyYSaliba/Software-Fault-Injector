@@ -1,5 +1,6 @@
 #include <iostream>
 
 int main () {
-    std::cerr << "Hello world";
+    std::cout << "Hello world";
+    std::cerr << "error error";
 }
