@@ -28,3 +28,5 @@ target_link_libraries(sofi
                       ${PROJECT_SOURCE_DIR}/ext/libelfin/dwarf/libdwarf++.so
                       ${PROJECT_SOURCE_DIR}/ext/libelfin/elf/libelf++.so)
 add_dependencies(sofi libelfin)
+
+set (CMAKE_CXX_FLAGS "-pthread")

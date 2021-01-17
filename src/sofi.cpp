@@ -17,6 +17,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <cstdlib>
+#include <pthread.h>
 
 #include "linenoise.h"
 
@@ -708,11 +710,7 @@ void execute_debugee (const std::string& prog_name) {
     execl(prog_name.c_str(), prog_name.c_str(), nullptr);
 }
 
-int main(int argc, char* argv[]) {
-
-    srand(time(0));
-    
-    int num = 0;
+struct thread_arguments {
     string prog = "";
     string functionName = "";
     string fileName = "";
@@ -721,51 +719,14 @@ int main(int argc, char* argv[]) {
     int L2 = 0;
     string injectionType = "";
     int numberOfTests = 0;
+    long tid;
+} init_vars;
 
-    do{
-        cout    << "Please enter name of the program that you want to debug..." << endl;
-        cin     >> prog;
-    }while(prog == "");
+void *thread_function(void *arguments) {
+    struct thread_arguments *args = (struct thread_arguments *)arguments;
 
-    do{
-        cout    << "Please enter how you want to inject..." << endl;
-        cout    << "Between lines L1 and L2 ?[1] or inside a function f ?[2]";
-        cin     >> inputType;
-    }while(inputType == 0);
-
-    
-    if(inputType == 1){
-        do{
-            cout    << "Please enter file name..." << endl;
-            cin     >> fileName;
-            cout    << "Please enter Line 1..." << endl;
-            cin     >> L1;
-            cout    << "Please enter Line 2..." << endl;
-            cin     >> L2;
-        }while(L1 == 0 || L2 == 0 || fileName == "");
-    }
-    else if(inputType == 2){
-        do{
-            cout    << "Please enter name of the function that you want to debug..." << endl;
-            cin     >> functionName;
-        }while(functionName == "");
-    }
-
-
-    do{
-        cout    << "Please enter Injection type..." << endl;
-        cin     >> injectionType;
-    }while(injectionType == "");
-
-    do{
-        cout    << "Please enter number of injections..." << endl;
-        cin     >> num;
-    }while(num <= 0);
-
-    // do{
-    //     cout    << "Please enter the number of error injections to be performed..." << endl;
-    //     cin     >>  numberOfTests;
-    // }while(numberOfTests<0);
+    long tid;
+    tid = args->tid;
 
     int filedesOut[2];
     int filedesErr[2];
@@ -781,7 +742,7 @@ int main(int argc, char* argv[]) {
 
     auto pid = fork();
     if (pid == 0) {
-        //child         STDERR_FILENO       STDERR_FILENO
+        //child
         while ((dup2(filedesOut[1], STDOUT_FILENO) == -1) && (errno == EINTR)) {}
         while ((dup2(filedesErr[1], STDERR_FILENO) == -1) && (errno == EINTR)) {}
         close(filedesOut[1]);
@@ -789,43 +750,42 @@ int main(int argc, char* argv[]) {
         close(filedesErr[1]);
         close(filedesErr[0]);
         personality(ADDR_NO_RANDOMIZE);
-        execute_debugee(prog);
+        execute_debugee(args->prog);
     }
     else if (pid >= 1)  {
         //parent
-        close(filedesOut[1]);
-        close(filedesErr[1]);
-        std::cout << "Started debugging process " << pid << '\n';
-        debugger dbg{prog, pid};
+        std::cout << "Start process " << pid << " on thread "<<tid<<endl;
+        debugger dbg{args->prog, pid};
         dbg.run();
         intptr_t addr1;
         intptr_t addr2;
         intptr_t addr;
 
-        if(inputType == 1){
-            dbg.get_address_at_source_line(fileName, L1, addr1);
-            dbg.get_address_at_source_line(fileName, L2, addr2);
+        if(args->inputType == 1){
+            dbg.get_address_at_source_line(args->fileName, args->L1, addr1);
+            dbg.get_address_at_source_line(args->fileName, args->L2, addr2);
             addr = addr1 + rand() % ((addr2 - addr1) +1);
             dbg.get_alligned_address(addr);
         }
-        else if (inputType == 2){
-            dbg.get_function_start_and_end_addresses(functionName,addr1, addr2);
+        else if (args->inputType == 2){
+            dbg.get_function_start_and_end_addresses(args->functionName,addr1, addr2);
             addr = addr1 + rand() % ((addr2 - addr1) +1);
             dbg.get_alligned_address(addr);
         }
 
-        if (injectionType == "Opcode"){
+        if (args->injectionType == "Opcode"){
             dbg.mutate_opcode(addr);
         }
-        else if (injectionType == "Register"){
+        else if (args->injectionType == "Register"){
             dbg.mutate_register(addr);
         }
-        else if (injectionType == "Data"){
+        else if (args->injectionType == "Data"){
             dbg.mutate_data(addr);
         }
-        else if (injectionType == "test"){
+        else if (args->injectionType == "test"){
 
         }
+        
         close(filedesOut[1]);
         close(filedesErr[1]);
 
@@ -833,52 +793,96 @@ int main(int argc, char* argv[]) {
         char bufferErr[4096];
 
         dbg.continue_execution();
-        while (1) { // read stdout
-            ssize_t count = read(filedesOut[0], bufferOut, sizeof(bufferOut));
-            if (count == -1) {
-                if (errno == EINTR) {
-                    continue;
-                } 
-                else {
-                    perror("read");
-                    exit(1);
-                }
-            } 
-            else if (count == 0) {
-                break;
-            } 
-            // else {
-            //     for (int i=0; i<count; i++){
-            //         cout<<bufferOut[i];
-            //     }
-            //     cout<<endl;
-            // }
-        }
+
+        ssize_t countOut = read(filedesOut[0], bufferOut, sizeof(bufferOut));
         close(filedesOut[0]);
 
-        while (1) { // read stdErr
-            ssize_t count = read(filedesErr[0], bufferErr, sizeof(bufferErr));
-            if (count == -1) {
-                if (errno == EINTR) {
-                    continue;
-                } 
-                else {
-                    perror("read");
-                    exit(1);
-                }
-            } 
-            else if (count == 0) {
-                break;
-            } 
-            // else {
-            //     for (int i=0; i<count; i++){
-            //         cout<<"#"<<bufferErr[i];
-            //     }
-            //     cout<<endl;
-            // }
-        }
+        ssize_t countErr = read(filedesErr[0], bufferErr, sizeof(bufferErr));
         close(filedesErr[0]);
     }
-    cout<<"pid "<<pid<<" exited;"<<endl;
+    cout<<"Exit pid "<<pid<<" and thread "<<tid<<endl;
+
+    pthread_exit(NULL);
+}
+
+int main(int argc, char* argv[]) {
+
+    srand(time(0));
+
+    do{
+        cout    << "Please enter name of the program that you want to debug..." << endl;
+        cin     >> init_vars.prog;
+    }while(init_vars.prog == "");
+
+    do{
+        cout    << "Please enter how you want to inject..." << endl;
+        cout    << "Between lines L1 and L2 ?[1] or inside a function f ?[2]";
+        cin     >> init_vars.inputType;
+    }while(init_vars.inputType == 0);
+
+    
+    if(init_vars.inputType == 1){
+        do{
+            cout    << "Please enter file name..." << endl;
+            cin     >> init_vars.fileName;
+            cout    << "Please enter Line 1..." << endl;
+            cin     >> init_vars.L1;
+            cout    << "Please enter Line 2..." << endl;
+            cin     >> init_vars.L2;
+        }while(init_vars.L1 == 0 || init_vars.L2 == 0 || init_vars.fileName == "");
+    }
+    else if(init_vars.inputType == 2){
+        do{
+            cout    << "Please enter name of the function that you want to debug..." << endl;
+            cin     >> init_vars.functionName;
+        }while(init_vars.functionName == "");
+    }
+
+
+    do{
+        cout    << "Please enter Injection type..." << endl;
+        cin     >> init_vars.injectionType;
+    }while(init_vars.injectionType == "");
+
+    do{
+        cout    << "Please enter the number of error injections to be performed..." << endl;
+        cin     >>  init_vars.numberOfTests;
+    }while(init_vars.numberOfTests<0);
+
+    int rc;
+    int i;
+    pthread_t* threads = new pthread_t[init_vars.numberOfTests];
+    pthread_attr_t attr;
+    void *status;
+    
+    // Initialize and set thread joinable
+    pthread_attr_init(&attr);
+    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
+
+    for( i = 0; i < init_vars.numberOfTests; i++ ) {
+        cout << "main() : creating thread, " << i << endl;
+        init_vars.tid = i;
+        rc = pthread_create(&threads[i], &attr, thread_function, (void *)&init_vars);
+        if (rc) {
+            cout << "Error:unable to create thread," << rc << endl;
+            exit(-1);
+        }
+    }
+
+    // free attribute and wait for the other threads
+    pthread_attr_destroy(&attr);
+    for( i = 0; i < init_vars.numberOfTests; i++ ) {
+        rc = pthread_join(threads[i], &status);
+        if (rc) {
+            cout << "Error:unable to join," << rc << endl;
+            exit(-1);
+        }
+        cout << "Main: completed thread id :" << i ;
+        cout << "  exiting with status :" << status << endl;
+    }
+
+    cout << "Main: program exiting." << endl;
+    pthread_exit(NULL);
+
     return 0;
 }
