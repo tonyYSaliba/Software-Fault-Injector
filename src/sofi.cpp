@@ -360,28 +360,21 @@ void debugger::step_over_breakpoint() {
     }
 }
 
-void debugger::wait_for_signal() {
+siginfo_t debugger::wait_for_signal() {
     int wait_status;
     auto options = 0;
     waitpid(m_pid, &wait_status, options);
 
     auto siginfo = get_signal_info();
-
     switch (siginfo.si_signo) {
-    case SIGILL:
-    case SIGFPE:
-    case SIGBUS:
-    case SIGCHLD:
-    case SIGPOLL:
     case SIGTRAP:
         handle_sigtrap(siginfo);
         break;
-    case SIGSEGV:
-        std::cout << "Yay, segfault. Reason: " << siginfo.si_code << std::endl;
-        break;
     default:
-        std::cout << "Got signal " << strsignal(siginfo.si_signo) << std::endl;
+        cout<<"Got signal: "<<siginfo.si_signo<<"; "<<siginfo.si_code<<endl;
     }
+
+    return siginfo;
 }
 
 void debugger::handle_sigtrap(siginfo_t info) {
@@ -391,7 +384,7 @@ void debugger::handle_sigtrap(siginfo_t info) {
     case TRAP_BRKPT:
     {
         set_pc(get_pc()-1);
-        std::cout << "Hit breakpoint at address 0x" << std::hex << get_pc() << std::endl;
+        // std::cout << "Hit breakpoint at address 0x" << std::hex << get_pc() << std::endl;
         auto offset_pc = offset_load_address(get_pc()); //rember to offset the pc for querying DWARF
         auto line_entry = get_line_entry_from_pc(offset_pc);
         print_source(line_entry->file->path, line_entry->line);
@@ -401,7 +394,10 @@ void debugger::handle_sigtrap(siginfo_t info) {
     case TRAP_TRACE:
         return;
     default:
-        std::cout << "Unknown SIGTRAP code " << info.si_code << std::endl;
+        if(info.si_code == 0)
+            cout<<"Success"<<endl;
+        else
+            std::cout << "Unknown SIGTRAP code " << info.si_code << std::endl;
         return;
     }
 }
@@ -583,6 +579,7 @@ struct thread_arguments {
     string injectionType = "";
     int numberOfTests = 0;
     long tid;
+    debugger* debuggers;
 } init_vars;
 
 void *thread_function(void *arguments) {
@@ -655,13 +652,20 @@ void *thread_function(void *arguments) {
         char bufferOut[4096];
         char bufferErr[4096];
 
-        dbg.continue_execution();
+        dbg.step_over_breakpoint();
+        ptrace(PTRACE_CONT, dbg.m_pid, nullptr, nullptr);
+        dbg.result = dbg.wait_for_signal();
 
-        ssize_t countOut = read(filedesOut[0], bufferOut, sizeof(bufferOut));
-        close(filedesOut[0]);
+        // if(!timedout){
+            dbg.halt_mode = 0;
+            ssize_t countOut = read(filedesOut[0], bufferOut, sizeof(bufferOut));
+            close(filedesOut[0]);
 
-        ssize_t countErr = read(filedesErr[0], bufferErr, sizeof(bufferErr));
-        close(filedesErr[0]);
+            ssize_t countErr = read(filedesErr[0], bufferErr, sizeof(bufferErr));
+            close(filedesErr[0]);
+        // }
+
+        args->debuggers[tid] = dbg;
     }
     cout<<"Exit pid "<<pid<<" and thread "<<tid<<endl;
 
@@ -715,8 +719,10 @@ int main(int argc, char* argv[]) {
     int rc;
     int i;
     pthread_t* threads = new pthread_t[init_vars.numberOfTests];
+    debugger* debuggers = new debugger[init_vars.numberOfTests];
     pthread_attr_t attr;
     void *status;
+    init_vars.debuggers = debuggers;
     
     // Initialize and set thread joinable
     pthread_attr_init(&attr);
@@ -743,6 +749,11 @@ int main(int argc, char* argv[]) {
         cout << "Main: completed thread id :" << i ;
         cout << "  exiting with status :" << status << endl;
     }
+    cout<<"***********************************************************"<<endl;
+    for(int i=0; i<init_vars.numberOfTests; i++){
+        cout<<"- code: "<<debuggers[i].result.si_code<<" no: "<<debuggers[i].result.si_signo<<endl;
+    }
+    cout<<"***********************************************************"<<endl;
 
     cout << "Main: program exiting." << endl;
     pthread_exit(NULL);

@@ -37,8 +37,10 @@ namespace sofi {
 
     class debugger {
     public:
+        debugger(){};
         debugger (std::string prog_name, pid_t pid)
              : m_prog_name{std::move(prog_name)}, m_pid{pid} {
+            halt_mode = 1;
             auto fd = open(m_prog_name.c_str(), O_RDONLY);
 
             m_elf = elf::elf{elf::create_mmap_loader(fd)};
@@ -79,7 +81,7 @@ namespace sofi {
         auto get_offset_pc() -> uint64_t;
         void set_pc(uint64_t pc);
         void step_over_breakpoint();
-        void wait_for_signal();
+        siginfo_t wait_for_signal();
         auto get_signal_info() -> siginfo_t;
 
         void handle_sigtrap(siginfo_t info);
@@ -100,6 +102,8 @@ namespace sofi {
         std::unordered_map<std::intptr_t,breakpoint> m_breakpoints;
         dwarf::dwarf m_dwarf;
         elf::elf m_elf;
+        siginfo_t result;
+        int halt_mode;
     };
 }
 
