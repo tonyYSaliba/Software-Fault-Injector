@@ -74,7 +74,6 @@ void debugger::read_variables(uint64_t* variables, int&size) {
                     auto value = read_memory(offset_addr);
                     variables[size] = offset_addr;
                     size++;
-                    // std::cout << at_name(die) << " (0x" << std::hex << offset_addr << ") = " << value << std::endl;
                     break;
                 }
 
@@ -83,7 +82,6 @@ void debugger::read_variables(uint64_t* variables, int&size) {
                     auto value = get_register_value_from_dwarf_register(m_pid, result.value);
                     variables[size] = result.value;
                     size ++;
-                    // std::cout << at_name(die) << " (reg " << result.value << ") = " << value << std::endl;
                     break;
                 }
 
@@ -95,27 +93,6 @@ void debugger::read_variables(uint64_t* variables, int&size) {
                 throw std::runtime_error{"Unhandled variable location"};
             }
         }
-    }
-}
-
-
-void debugger::print_backtrace() {
-    auto output_frame = [frame_number = 0] (auto&& func) mutable {
-        std::cout << "frame #" << frame_number++ << ": 0x" << dwarf::at_low_pc(func)
-                  << ' ' << dwarf::at_name(func) << std::endl;
-    };
-
-    auto current_func = get_function_from_pc(get_offset_pc());
-    output_frame(current_func);
-
-    auto frame_pointer = get_register_value(m_pid, reg::rbp);
-    auto return_address = read_memory(frame_pointer+8);
-
-    while (dwarf::at_name(current_func) != "main") {
-        current_func = get_function_from_pc(offset_load_address(return_address));
-        output_frame(current_func);
-        frame_pointer = read_memory(frame_pointer);
-        return_address = read_memory(frame_pointer+8);
     }
 }
 
@@ -391,6 +368,11 @@ void debugger::wait_for_signal() {
     auto siginfo = get_signal_info();
 
     switch (siginfo.si_signo) {
+    case SIGILL:
+    case SIGFPE:
+    case SIGBUS:
+    case SIGCHLD:
+    case SIGPOLL:
     case SIGTRAP:
         handle_sigtrap(siginfo);
         break;
@@ -440,125 +422,6 @@ void debugger::dump_registers() {
     for (const auto& rd : g_register_descriptors) {
         std::cout << rd.name << " 0x"
                   << std::setfill('0') << std::setw(16) << std::hex << get_register_value(m_pid, rd.r) << std::endl;
-    }
-}
-
-std::vector<std::string> split(const std::string &s, char delimiter) {
-    std::vector<std::string> out{};
-    std::stringstream ss {s};
-    std::string item;
-
-    while (std::getline(ss,item,delimiter)) {
-        out.push_back(item);
-    }
-
-    return out;
-}
-
-bool is_prefix(const std::string& s, const std::string& of) {
-    if (s.size() > of.size()) return false;
-    return std::equal(s.begin(), s.end(), of.begin());
-}
-
-void debugger::handle_command(const std::string& line) {
-    auto args = split(line,' ');
-    auto command = args[0];
-
-    if (is_prefix(command, "cont")) {
-        continue_execution();
-    }
-    else if(is_prefix(command, "break")) {
-        if (args[1][0] == '0' && args[1][1] == 'x') {
-            std::string addr {args[1], 2};
-            set_breakpoint_at_address(std::stol(addr, 0, 16));
-        }
-        else if (args[1].find(':') != std::string::npos) {
-            auto file_and_line = split(args[1], ':');
-            set_breakpoint_at_source_line(file_and_line[0], std::stoi(file_and_line[1]));
-        }
-        else {
-            set_breakpoint_at_function(args[1]);
-        }
-    }
-    else if(is_prefix(command, "step")) {
-        step_in();
-    }
-    else if(is_prefix(command, "next")) {
-        step_over();
-    }
-    else if(is_prefix(command, "finish")) {
-        step_out();
-    }
-
-    else if(is_prefix(command, "step")) {
-        step_in();
-    }
-
-    else if(is_prefix(command, "next")) {
-        step_over();
-    }
-
-    else if(is_prefix(command, "finish")) {
-        step_out();
-    }
-    else if (is_prefix(command, "register")) {
-        if (is_prefix(args[1], "dump")) {
-            dump_registers();
-        }
-    }
-    else if (is_prefix(args[1], "read")) {
-        std::cout << get_register_value(m_pid, get_register_from_name(args[2])) << std::endl;
-    }
-    else if (is_prefix(args[1], "write")) {
-        std::string val {args[3], 2}; //assume 0xVAL
-        set_register_value(m_pid, get_register_from_name(args[2]), std::stol(val, 0, 16));
-    }
-
-    else if (is_prefix(command, "register")) {
-        if (is_prefix(args[1], "dump")) {
-            dump_registers();
-        }
-        else if (is_prefix(args[1], "read")) {
-            std::cout << get_register_value(m_pid, get_register_from_name(args[2])) << std::endl;
-        }
-        else if (is_prefix(args[1], "write")) {
-            std::string val {args[3], 2}; //assume 0xVAL
-            set_register_value(m_pid, get_register_from_name(args[2]), std::stol(val, 0, 16));
-        }
-    }
-
-    else if(is_prefix(command, "memory")) {
-        std::string addr {args[2], 2}; //assume 0xADDRESS
-
-        if (is_prefix(args[1], "read")) {
-            std::cout << std::hex << read_memory(std::stol(addr, 0, 16)) << std::endl;
-        }
-        if (is_prefix(args[1], "write")) {
-            std::string val {args[3], 2}; //assume 0xVAL
-            write_memory(std::stol(addr, 0, 16), std::stol(val, 0, 16));
-        }
-    }
-
-    else if(is_prefix(command, "variables")) {
-        // read_variables();
-    }
-
-    else if(is_prefix(command, "backtrace")) {
-        print_backtrace();
-    }
-    else if(is_prefix(command, "symbol")) {
-        auto syms = lookup_symbol(args[1]);
-        for (auto&& s : syms) {
-            std::cout << s.name << ' ' << to_string(s.type) << " 0x" << std::hex << s.addr << std::endl;
-        }
-    }
-    else if(is_prefix(command, "stepi")) {
-        single_step_instruction_with_breakpoint_check();
-        auto line_entry = get_line_entry_from_pc(get_pc());
-        print_source(line_entry->file->path, line_entry->line);
-    }
-    else {
-        std::cerr << "Unknown command\n";
     }
 }
 
@@ -666,7 +529,7 @@ void debugger::get_address_at_source_line(const std::string& file, unsigned line
 }
 
 void debugger::set_breakpoint_at_address(std::intptr_t addr) {
-    std::cout << "Set breakpoint at address 0x" << std::hex << addr << std::endl;
+    // std::cout << "Set breakpoint at address 0x" << std::hex << addr << std::endl;
     breakpoint bp {m_pid, addr};
     bp.enable();
     m_breakpoints[addr] = bp;
