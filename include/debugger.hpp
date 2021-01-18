@@ -10,6 +10,9 @@
 #include "dwarf/dwarf++.hh"
 #include "elf/elf++.hh"
 
+#define INFINITY 300
+
+
 namespace sofi {
     enum class symbol_type {
         notype,            // No type (e.g., absolute symbol)
@@ -103,7 +106,9 @@ namespace sofi {
         dwarf::dwarf m_dwarf;
         elf::elf m_elf;
         siginfo_t result;
+        int duration = 0;
         int halt_mode;
+        int ttl = INFINITY;
     };
 }
 

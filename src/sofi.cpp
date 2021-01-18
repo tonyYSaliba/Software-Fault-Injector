@@ -25,7 +25,11 @@
 #include <thread>
 #include <chrono>
 
+#include <mutex>              // std::mutex, std::unique_lock
+#include <condition_variable> // std::condition_variable
+
 using namespace std::chrono_literals;
+using namespace std::chrono; 
 
 #include "linenoise.h"
 
@@ -34,6 +38,13 @@ using namespace std::chrono_literals;
 
 using namespace sofi;
 using namespace std;
+
+#define INFINITY 300
+#define BUFFER_SIZE 4096
+
+std::mutex mtx;
+std::condition_variable cv;
+bool ready = false;
 
 class ptrace_expr_context : public dwarf::expr_context {
 public:
@@ -590,10 +601,27 @@ struct thread_arguments {
     int numberOfTests = 0;
     long tid;
     debugger* debuggers;
+    char* originalOut;
+    char* originalErr;
+    size_t countOut;
+    size_t countErr;
 };
 
+void go() {
+  std::unique_lock<std::mutex> lck(mtx);
+  ready = true;
+  cv.notify_all();
+}
+int get_ttl(int duration, int number_of_tests){
+    return (duration+1)*number_of_tests;
+}
+void set_timeout(int seconds){
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+}
 void thread_function(void *arguments) {
     struct thread_arguments *args = (struct thread_arguments *)arguments;
+
+    auto start = high_resolution_clock::now(); 
 
     long tid;
     tid = args->tid;
@@ -653,7 +681,10 @@ void thread_function(void *arguments) {
             dbg.mutate_register(addr);
         }
         else if (args->injectionType == "Data"){
-            dbg.mutate_data(addr);
+            dbg.mutate_data(addr);        
+        }
+        else if (args->injectionType == "init"){
+            cout<<"golden code: "<<tid<<endl;
         }
         else if (args->injectionType == "test"){
 
@@ -662,43 +693,41 @@ void thread_function(void *arguments) {
         close(filedesOut[1]);
         close(filedesErr[1]);
 
-        char bufferOut[4096];
-        char bufferErr[4096];
+        char bufferOut[BUFFER_SIZE];
+        char bufferErr[BUFFER_SIZE];
 
         dbg.step_over_breakpoint();
         ptrace(PTRACE_CONT, dbg.m_pid, nullptr, nullptr);
-        // cout<<"herreee "<<dbg.m_pid<<endl;
         dbg.result = dbg.wait_for_signal();
 
         if(args->debuggers[tid].halt_mode == 0 && dbg.result.si_code == 0){
+            auto stop = high_resolution_clock::now(); 
+            auto duration = duration_cast<seconds>(stop - start); 
+            dbg.duration = duration.count();
+            dbg.ttl = get_ttl(dbg.duration, args->numberOfTests);
             ssize_t countOut = read(filedesOut[0], bufferOut, sizeof(bufferOut));
             ssize_t countErr = read(filedesErr[0], bufferErr, sizeof(bufferErr));
-            // cout<<"dada"<<endl;
-
-            // if(countOut){
-            //     for (int i=0; i<countOut; i++){
-            //         cout<<bufferOut[i];
-            //     }
-            //     cout<<endl;
-            // }
         }
         else if (args->debuggers[tid].halt_mode != 0){
             dbg.halt_mode = 1;
         }
         close(filedesOut[0]);
         close(filedesErr[0]);
+
         args->debuggers[tid] = dbg;
+        cout<<"Exit pid "<<pid<<" and thread "<<tid<<" duration "<<args->debuggers[tid].duration<<endl;
     }
-    // cout<<"Exit pid "<<pid<<" and thread "<<tid<<endl;
 
 }
 
-void set_timeout(int seconds){
-    std::this_thread::sleep_for(std::chrono::seconds(seconds));
-    throw 1;
-}
+
 void *thread_function_init(void *arguments) {
     struct thread_arguments *args = (struct thread_arguments *)arguments;
+
+    if(args->tid){
+        std::unique_lock<std::mutex> lck(mtx);
+        while (!ready) cv.wait(lck);
+    }
 
     std::future<void> future = std::async(std::launch::async, [arguments](){ 
         thread_function(arguments);
@@ -707,7 +736,7 @@ void *thread_function_init(void *arguments) {
     std::future_status status;
     bool timeout_done = false;
     do {
-        status = future.wait_for(std::chrono::seconds(5));
+        status = future.wait_for(std::chrono::seconds(args->debuggers[0].ttl));
         if (status == std::future_status::deferred) {
             // std::cout << "deferred\n";
         } else if (status == std::future_status::timeout && !timeout_done) {
@@ -719,7 +748,7 @@ void *thread_function_init(void *arguments) {
             // std::cout << "ready!\n";
         }
     } while (status != std::future_status::ready ); 
-
+    go();
     pthread_exit(NULL);
 }
 int main(int argc, char* argv[]) {
@@ -770,20 +799,23 @@ int main(int argc, char* argv[]) {
 
     int rc;
     int i;
-    pthread_t* threads = new pthread_t[init_vars.numberOfTests];
-    debugger* debuggers = new debugger[init_vars.numberOfTests];
+    pthread_t* threads = new pthread_t[init_vars.numberOfTests + 1];
+    debugger* debuggers = new debugger[init_vars.numberOfTests + 1];
     pthread_attr_t attr;
     void *status;
     init_vars.debuggers = debuggers;
-    thread_arguments* init_vars_arr = new thread_arguments[init_vars.numberOfTests];
+    thread_arguments* init_vars_arr = new thread_arguments[init_vars.numberOfTests + 1];
 
     // Initialize and set thread joinable
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    for( i = 0; i < init_vars.numberOfTests; i++ ) {
+    for( i = 0; i < init_vars.numberOfTests + 1; i++ ) {
         cout << "main() : creating thread, " << i << endl;
         init_vars_arr[i] = init_vars;
+        if(i == 0){
+            init_vars_arr[i].injectionType = "init";
+        }
         init_vars_arr[i].tid = i;
         rc = pthread_create(&threads[i], &attr, thread_function_init, (void *)&(init_vars_arr[i]));
         if (rc) {
@@ -794,7 +826,7 @@ int main(int argc, char* argv[]) {
 
     // free attribute and wait for the other threads
     pthread_attr_destroy(&attr);
-    for( i = 0; i < init_vars.numberOfTests; i++ ) {
+    for( i = 0; i < init_vars.numberOfTests + 1; i++ ) {
         rc = pthread_join(threads[i], &status);
         if (rc) {
             cout << "Error:unable to join," << rc << endl;
@@ -804,8 +836,8 @@ int main(int argc, char* argv[]) {
         cout << "  exiting with status :" << status << endl;
     }
     cout<<"***********************************************************"<<endl;
-    for(int i=0; i<init_vars.numberOfTests; i++){
-        cout<<"- process: "<<debuggers[i].m_pid<<" - code: "<<debuggers[i].result.si_code<<" - no: "<<strsignal(debuggers[i].result.si_signo)<<" - halt: "<<debuggers[i].halt_mode<<endl;
+    for(int i=0; i<init_vars.numberOfTests + 1; i++){
+        cout<<"- process: "<<debuggers[i].m_pid<<" - code: "<<debuggers[i].result.si_code<<" - no: "<<strsignal(debuggers[i].result.si_signo)<<" - halt: "<<debuggers[i].halt_mode<<" - duration: "<<debuggers[i].duration<<endl;
     }
     cout<<"***********************************************************"<<endl;
 
