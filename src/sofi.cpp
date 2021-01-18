@@ -20,6 +20,13 @@
 #include <cstdlib>
 #include <pthread.h>
 
+
+#include <future>
+#include <thread>
+#include <chrono>
+
+using namespace std::chrono_literals;
+
 #include "linenoise.h"
 
 #include "debugger.hpp"
@@ -362,16 +369,17 @@ void debugger::step_over_breakpoint() {
 
 siginfo_t debugger::wait_for_signal() {
     int wait_status;
-    auto options = 0;
-    waitpid(m_pid, &wait_status, options);
-
+    // auto options = ;
+    waitpid(m_pid, &wait_status, WSTOPPED | WUNTRACED);//WUNTRACED
+    // cout<<"########### "<<m_pid<<endl;
     auto siginfo = get_signal_info();
     switch (siginfo.si_signo) {
     case SIGTRAP:
         handle_sigtrap(siginfo);
         break;
     default:
-        cout<<"Got signal: "<<siginfo.si_signo<<"; "<<siginfo.si_code<<endl;
+        // cout<<"Got signal("<<m_pid<<"): "<<strsignal(siginfo.si_signo)<<"; "<<siginfo.si_code<<endl;
+        break;
     }
 
     return siginfo;
@@ -387,17 +395,17 @@ void debugger::handle_sigtrap(siginfo_t info) {
         // std::cout << "Hit breakpoint at address 0x" << std::hex << get_pc() << std::endl;
         auto offset_pc = offset_load_address(get_pc()); //rember to offset the pc for querying DWARF
         auto line_entry = get_line_entry_from_pc(offset_pc);
-        print_source(line_entry->file->path, line_entry->line);
+        // print_source(line_entry->file->path, line_entry->line);
         return;
     }
     //this will be set if the signal was sent by single stepping
-    case TRAP_TRACE:
-        return;
+    // case TRAP_TRACE:
+    //     return;
     default:
-        if(info.si_code == 0)
-            cout<<"Success"<<endl;
-        else
-            std::cout << "Unknown SIGTRAP code " << info.si_code << std::endl;
+    //     if(info.si_code == 0)
+    //         cout<<"Success"<<endl;
+    //     else
+    //         std::cout << "Unknown SIGTRAP code " << info.si_code << std::endl;
         return;
     }
 }
@@ -559,6 +567,7 @@ void debugger::mutate_data(std::intptr_t addr){
     int i = rand() % size;
     write_memory(variables[i], ((~0xFF)&(read_memory(variables[i]))) | ~(0xFF&(read_memory(variables[i]))) );
     // cout<<(variables[i]) <<": "<<~dbg.read_memory( (variables[i]))<<"; ";
+    // continue_execution();
 }
 
 void execute_debugee (const std::string& prog_name) {
@@ -568,6 +577,7 @@ void execute_debugee (const std::string& prog_name) {
     }
     execl(prog_name.c_str(), prog_name.c_str(), nullptr);
 }
+
 
 struct thread_arguments {
     string prog = "";
@@ -580,9 +590,9 @@ struct thread_arguments {
     int numberOfTests = 0;
     long tid;
     debugger* debuggers;
-} init_vars;
+};
 
-void *thread_function(void *arguments) {
+void thread_function(void *arguments) {
     struct thread_arguments *args = (struct thread_arguments *)arguments;
 
     long tid;
@@ -614,9 +624,12 @@ void *thread_function(void *arguments) {
     }
     else if (pid >= 1)  {
         //parent
-        std::cout << "Start process " << pid << " on thread "<<tid<<endl;
+        // std::cout << "Start process " << pid << " on thread "<<tid<<endl;
         debugger dbg{args->prog, pid};
         dbg.run();
+        args->debuggers[tid] = dbg;
+        // debugger& dbg = (args->debuggers[tid]);
+
         intptr_t addr1;
         intptr_t addr2;
         intptr_t addr;
@@ -654,27 +667,66 @@ void *thread_function(void *arguments) {
 
         dbg.step_over_breakpoint();
         ptrace(PTRACE_CONT, dbg.m_pid, nullptr, nullptr);
+        // cout<<"herreee "<<dbg.m_pid<<endl;
         dbg.result = dbg.wait_for_signal();
 
-        // if(!timedout){
-            dbg.halt_mode = 0;
+        if(args->debuggers[tid].halt_mode == 0 && dbg.result.si_code == 0){
             ssize_t countOut = read(filedesOut[0], bufferOut, sizeof(bufferOut));
-            close(filedesOut[0]);
-
             ssize_t countErr = read(filedesErr[0], bufferErr, sizeof(bufferErr));
-            close(filedesErr[0]);
-        // }
+            // cout<<"dada"<<endl;
 
+            // if(countOut){
+            //     for (int i=0; i<countOut; i++){
+            //         cout<<bufferOut[i];
+            //     }
+            //     cout<<endl;
+            // }
+        }
+        else if (args->debuggers[tid].halt_mode != 0){
+            dbg.halt_mode = 1;
+        }
+        close(filedesOut[0]);
+        close(filedesErr[0]);
         args->debuggers[tid] = dbg;
     }
-    cout<<"Exit pid "<<pid<<" and thread "<<tid<<endl;
+    // cout<<"Exit pid "<<pid<<" and thread "<<tid<<endl;
+
+}
+
+void set_timeout(int seconds){
+    std::this_thread::sleep_for(std::chrono::seconds(seconds));
+    throw 1;
+}
+void *thread_function_init(void *arguments) {
+    struct thread_arguments *args = (struct thread_arguments *)arguments;
+
+    std::future<void> future = std::async(std::launch::async, [arguments](){ 
+        thread_function(arguments);
+    }); 
+ 
+    std::future_status status;
+    bool timeout_done = false;
+    do {
+        status = future.wait_for(std::chrono::seconds(5));
+        if (status == std::future_status::deferred) {
+            // std::cout << "deferred\n";
+        } else if (status == std::future_status::timeout && !timeout_done) {
+            timeout_done = true;
+            args->debuggers[args->tid].halt_mode = 1;
+            kill((args->debuggers[args->tid]).m_pid, SIGTRAP);
+            std::cout << "timeout thread "<<args->tid<<"...\n";
+        } else if (status == std::future_status::ready) {
+            // std::cout << "ready!\n";
+        }
+    } while (status != std::future_status::ready ); 
 
     pthread_exit(NULL);
 }
-
 int main(int argc, char* argv[]) {
 
     srand(time(0));
+
+    thread_arguments init_vars;
 
     do{
         cout    << "Please enter name of the program that you want to debug..." << endl;
@@ -723,15 +775,17 @@ int main(int argc, char* argv[]) {
     pthread_attr_t attr;
     void *status;
     init_vars.debuggers = debuggers;
-    
+    thread_arguments* init_vars_arr = new thread_arguments[init_vars.numberOfTests];
+
     // Initialize and set thread joinable
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
     for( i = 0; i < init_vars.numberOfTests; i++ ) {
         cout << "main() : creating thread, " << i << endl;
-        init_vars.tid = i;
-        rc = pthread_create(&threads[i], &attr, thread_function, (void *)&init_vars);
+        init_vars_arr[i] = init_vars;
+        init_vars_arr[i].tid = i;
+        rc = pthread_create(&threads[i], &attr, thread_function_init, (void *)&(init_vars_arr[i]));
         if (rc) {
             cout << "Error:unable to create thread," << rc << endl;
             exit(-1);
@@ -751,7 +805,7 @@ int main(int argc, char* argv[]) {
     }
     cout<<"***********************************************************"<<endl;
     for(int i=0; i<init_vars.numberOfTests; i++){
-        cout<<"- code: "<<debuggers[i].result.si_code<<" no: "<<debuggers[i].result.si_signo<<endl;
+        cout<<"- process: "<<debuggers[i].m_pid<<" - code: "<<debuggers[i].result.si_code<<" - no: "<<strsignal(debuggers[i].result.si_signo)<<" - halt: "<<debuggers[i].halt_mode<<endl;
     }
     cout<<"***********************************************************"<<endl;
 
