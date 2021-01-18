@@ -10,7 +10,7 @@
 #include "dwarf/dwarf++.hh"
 #include "elf/elf++.hh"
 
-#define INFINITY 300
+#define INFINITY 10
 
 
 namespace sofi {
@@ -109,6 +109,9 @@ namespace sofi {
         int duration = 0;
         int halt_mode;
         int ttl = INFINITY;
+        std::string originalOut="";
+        std::string originalErr="";
+        int sdc = 0;
     };
 }
 
