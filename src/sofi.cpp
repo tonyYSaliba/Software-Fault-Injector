@@ -783,9 +783,27 @@ void *thread_function_init(void *arguments) {
     go();
     pthread_exit(NULL);
 }
+void print_header(){
+    cout
+    <<"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMMMdy     ydNMMMMMMMMMMMMMMMMMMd          hMMd  yNMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMN    yyy    dMMMMMMMMMMMMMMMMMh          hMMd  yNMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMd   mMMMMy   NMMMMMNmmmNMMMMMMh   NMMMMMMMMMNNNNMMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMm    dmMMNNNNMMMNh       ydMMMh   NMMMMMMMMMh   MMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMMmy     yhmMMMMd    hddy    NMh          MMMh   MMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMMMMNmhy     hMN   yMMMMMN   yMh   yyyyyyyMMMh   MMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMhyyyMMMMNh   dm   hMMMMMMy   Mh   NMMMMMMMMMy   MMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMh   hNMMMd   dMy   dNMMmh   hMh   NMMMMMMMMMy   MMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMMh          hMMMh          dMMh   NMMMMMMMMMy   MMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMMMNmhyyyyhdNMMMMMNdhyyyyhmMMMMmhhhMMMMMMMMMMdhhhMMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"<<endl
+    <<"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"<<endl
+    <<endl;
+}
 int main(int argc, char* argv[]) {
-
-    // srand(time(0));
+    print_header();
+    srand(time(0));
 
     thread_arguments init_vars;
 
