@@ -640,15 +640,24 @@ void thread_function(void *arguments) {
         perror("pipe");
         exit(1);
     }
+    /* Set O_NONBLOCK flag for the read end (pfd[0]) of the pipe. */
+    if (fcntl(filedesOut[0], F_SETFL, O_NONBLOCK) == -1) {
+        fprintf(stderr, "Call to fcntl failed.\n");
+        exit(1);
+    }
+     if (fcntl(filedesErr[0], F_SETFL, O_NONBLOCK) == -1) {
+        fprintf(stderr, "Call to fcntl failed.\n");
+        exit(1);
+    }
 
     auto pid = fork();
     if (pid == 0) {
         //child
         while ((dup2(filedesOut[1], STDOUT_FILENO) == -1) && (errno == EINTR)) {}
         while ((dup2(filedesErr[1], STDERR_FILENO) == -1) && (errno == EINTR)) {}
-        close(filedesOut[1]);
+        // close(filedesOut[1]);
         close(filedesOut[0]);
-        close(filedesErr[1]);
+        // close(filedesErr[1]);
         close(filedesErr[0]);
         personality(ADDR_NO_RANDOMIZE);
         execute_debugee(args->prog);
@@ -706,24 +715,24 @@ void thread_function(void *arguments) {
         dbg.result = dbg.wait_for_signal();
 
         if(args->debuggers[tid].halt_mode == 0 && dbg.result.si_code == 0 && dbg.result.si_signo == 0 && dbg.result.si_errno == 0){
-            cout<<tid<<" enter"<<endl;
+            // cout<<tid<<" enter"<<endl;
             auto stop = high_resolution_clock::now(); 
             auto duration = duration_cast<seconds>(stop - start); 
             dbg.duration = duration.count();
             dbg.ttl = get_ttl(dbg.duration, args->numberOfTests);
-            cout<<tid<<" check1 "<<endl;
+            // cout<<tid<<" check1 "<<endl;
             ssize_t countOut = read(filedesOut[0], bufferOut, sizeof(bufferOut));
             ssize_t countErr = read(filedesErr[0], bufferErr, sizeof(bufferErr));
             dbg.originalOut = convertToString(bufferOut, countOut);
             dbg.originalErr = convertToString(bufferErr, countErr);
-            cout<<tid<<" check2 "<<endl;
+            // cout<<tid<<" check2 "<<endl;
             if(args->debuggers[0].originalOut != dbg.originalOut){
                 dbg.sdc = 1;
             }
             else if(args->debuggers[0].originalErr != dbg.originalErr){
                 dbg.sdc = 1;
             }
-            cout<<tid<<" quit"<<endl;
+            // cout<<tid<<" quit"<<endl;
 
         }
         else if (args->debuggers[tid].halt_mode != 0){
@@ -766,7 +775,7 @@ void *thread_function_init(void *arguments) {
             timeout_done = true;
             args->debuggers[args->tid].halt_mode = 1;
             kill((args->debuggers[args->tid]).m_pid, SIGTRAP);
-            std::cout << "timeout thread "<<args->tid<<"...\n";
+            // std::cout << "timeout thread "<<args->tid<<"...\n";
         } else if (status == std::future_status::ready) {
             // std::cout << "ready!\n";
         }
@@ -865,11 +874,11 @@ int main(int argc, char* argv[]) {
     cout<<"***********************************************************"<<endl;
 
     cout << "Main: program exiting." << endl;
-    for(int i=0; i<init_vars.numberOfTests+1;i++){
-        cout<<"+ "<<i<<endl;
-        cout<<debuggers[i].originalOut<<endl;
-        cout<<"----------------------"<<endl;
-    }
+    // for(int i=0; i<init_vars.numberOfTests+1;i++){
+    //     cout<<"+ "<<i<<endl;
+    //     cout<<debuggers[i].originalOut<<endl;
+    //     cout<<"----------------------"<<endl;
+    // }
     pthread_exit(NULL);
 
     return 0;
