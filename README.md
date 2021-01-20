@@ -1,5 +1,5 @@
 ## About The Project
----
+
 ### Project: Software Fault Injector with advanced Operating Systems capabilities
 #### Problem Definition
 Hardware failures can introduce errors due to several kinds of faults that can affect the software
@@ -14,7 +14,7 @@ in the form of mutation of single instructions or data elements of the program, 
 classification of the error will be used to feed a Bayesian Model.
 
 ## Introduction
----
+
 ### Sofi: Software Fault Injector
 
 #### Debugger Features
@@ -40,7 +40,7 @@ Our debugger will support the following features:
 The runtime program will be injected in the Opcode or Data. Injection in Opcode causes crash or hung mode (infinite loop) and injection in data causes SDC (Silent Data Corruption) 
 
 ## Getting Started
----
+
 1- clone the repository and install all required modules:
 
 ```
@@ -69,14 +69,14 @@ The runtime program will be injected in the Opcode or Data. Injection in Opcode 
 ### Prerequisites 
 
 #### Working Environment 
-This software is carried out in C++. You can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL).
+This software is carried out in C++. You can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL)
 
 #### IDE
-Any IDE that compile c++ codes.
+Any IDE that compile c++ codes
 
 
 ## Running the Debugger  
----
+
 
 #### Debugging with function name 
 1- Enter the name of the program that you want to debug:
@@ -103,8 +103,10 @@ you have 3 options: opcode, date, register
 **sdc**: 0 or 1 if there was silent data corruption 
 
 **code, error, singno**: if the program was crashed or not 
-**code:0, error:0, singno:0 and no: Unknown signal ** -> program executed successfuly 
-**code:1, error:1, singno:with different numbers and no: fault explanation ** -> program executed successfuly  
+
+**code:0, error:0, singno:0 and no: Unknown signal** -> program executed successfuly 
+
+**code:1, error:1, singno:with different numbers and no: fault explanation** -> program executed successfuly  
 
 #### Debugging by entering the lines  
 1- Enter the name of the program that you want to debug:
