@@ -1,3 +1,5 @@
+##About The Project
+---
 ### Project: Software Fault Injector with advanced Operating Systems capabilities
 #### Problem Definition
 Hardware failures can introduce errors due to several kinds of faults that can affect the software
@@ -11,9 +13,11 @@ the OS, in order to collect the final effect without affecting the whole system.
 in the form of mutation of single instructions or data elements of the program, while the
 classification of the error will be used to feed a Bayesian Model.
 
-#### Debugger Features
+## Introduction
+---
+###Sofi: Software Fault Injector
+####Debugger Features
 Our debugger will support the following features:
-
 + Launch, halt, and continue execution
 + Set breakpoints on
 + Memory addresses
@@ -29,19 +33,82 @@ Our debugger will support the following features:
 + Print backtrace
 + Print values of simple variables
 + Multi-threaded debugging support
-_____
 
 #### Types of Errors 
-The runtime program will be injected in the Opcode or Data. Injection in Opcode causes crash or hung mode (infinite loop) and injection in Data ccauses SDC(Silent Data Corruption) 
+The runtime program will be injected in the Opcode or Data. Injection in Opcode causes crash or hung mode (infinite loop) and injection in data causes SDC (Silent Data Corruption) 
 
-#### Libraries to Install
-Linenoise: For handeling command line input 
-Libelfin: For parsing the debug information
+## Getting Started
+---
+1- clone the repository and install all required modules:
+
+```
+>> git clone https://github.com/tonyYSaliba/Software-Fault-Injector.git
+```
+2- go to the directory: 
+
+```
+>> cd Software-Fault-Injector
+```
+3- for creating the make file type this: 
+```
+>> make 
+```
+4- then type this to build the project:
+
+```
+>> cmake ../. 
+```
+5- for running the debugger: 
+```
+>> ./sofi 
+``` 
+
+
+###Prerequisites 
+
+####Working Environment 
+This software is carried out in C++. You can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL).
+
+####Installed IDE
+Any IDE that compile c++ codes.
+
+
+## Running the Debugger  
+---
+####Libraries we used 
+**Linenoise**: For handeling command line input 
+**Libelfin**: For parsing the debug information
  
 #### Step-by-step running the debuger
-1- Lunch the child process 
-2- Set breakpoints 
-3- ...
 
-####
+#### Debugging with function name 
+1- Enter the name of the program that you want to debug:
+ you enter `unwinding`
+ 
+2- Then enter how you want to inject: Enter 1 or 2  
+1 for injecting through L1 and L2 lines 
+2 for entering the name of function
+
+3- if you choose 2: 
+Enter the name of function `tester`
+
+1- Then Enter the injection type: 
+you have 3 options: opcode, date, register
+
+2- Enter the number of error injections to be performed
+
+3- You will get the responces of all the tests:
+tid: Thread Id (the number of threads that were executing)
+halt: 0 or 1 if there was any halt, if we choose opcode as the injection type then program will enter to the hung mode
+sdc: 0 or 1 if there was silent data corruption 
+code, error, singno: if the program was crashed or not 
+if code:0, error:0, singno:0 and no: Unknown signal -> program executed successfuly  
+if code:1, error:1, singno:with different numbers and no: fault explanation -> program executed successfuly  
+
+#### Debugging by entering the lines  
+1- Enter the name of the program that you want to debug:
+ you enter `stack_unwinding`
+
+2- Enter Line1 and Line2 
+3- Enter the injection type and number of injections
 
