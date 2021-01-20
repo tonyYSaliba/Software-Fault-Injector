@@ -1,4 +1,4 @@
-##About The Project
+## About The Project
 ---
 ### Project: Software Fault Injector with advanced Operating Systems capabilities
 #### Problem Definition
@@ -15,8 +15,10 @@ classification of the error will be used to feed a Bayesian Model.
 
 ## Introduction
 ---
-###Sofi: Software Fault Injector
-####Debugger Features
+### Sofi: Software Fault Injector
+
+#### Debugger Features
+
 Our debugger will support the following features:
 + Launch, halt, and continue execution
 + Set breakpoints on
@@ -64,22 +66,17 @@ The runtime program will be injected in the Opcode or Data. Injection in Opcode 
 ``` 
 
 
-###Prerequisites 
+### Prerequisites 
 
-####Working Environment 
+#### Working Environment 
 This software is carried out in C++. You can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL).
 
-####Installed IDE
+#### IDE
 Any IDE that compile c++ codes.
 
 
 ## Running the Debugger  
 ---
-####Libraries we used 
-**Linenoise**: For handeling command line input 
-**Libelfin**: For parsing the debug information
- 
-#### Step-by-step running the debuger
 
 #### Debugging with function name 
 1- Enter the name of the program that you want to debug:
@@ -97,13 +94,17 @@ you have 3 options: opcode, date, register
 
 2- Enter the number of error injections to be performed
 
-3- You will get the responces of all the tests:
-tid: Thread Id (the number of threads that were executing)
-halt: 0 or 1 if there was any halt, if we choose opcode as the injection type then program will enter to the hung mode
-sdc: 0 or 1 if there was silent data corruption 
-code, error, singno: if the program was crashed or not 
-if code:0, error:0, singno:0 and no: Unknown signal -> program executed successfuly  
-if code:1, error:1, singno:with different numbers and no: fault explanation -> program executed successfuly  
+3- You will get the responces of all the tests, this is the output: 
+
+**tid**: Thread Id (the number of threads that were executing)
+
+**halt**: 0 or 1 if there was any halt, if we choose opcode as the injection type then program will enter to the hung mode
+
+**sdc**: 0 or 1 if there was silent data corruption 
+
+**code, error, singno**: if the program was crashed or not 
+**code:0, error:0, singno:0 and no: Unknown signal ** -> program executed successfuly 
+**code:1, error:1, singno:with different numbers and no: fault explanation ** -> program executed successfuly  
 
 #### Debugging by entering the lines  
 1- Enter the name of the program that you want to debug:
