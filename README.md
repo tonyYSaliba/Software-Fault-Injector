@@ -13,6 +13,8 @@ the OS, in order to collect the final effect without affecting the whole system.
 in the form of mutation of single instructions or data elements of the program, while the
 classification of the error will be used to feed a Bayesian Model.
 
+
+
 ## Introduction
 
 ### Sofi: Software Fault Injector
@@ -41,26 +43,26 @@ The runtime program will be injected in the Opcode or Data. Injection in Opcode 
 
 ## Getting Started
 
-1- clone the repository and install all required modules:
+1- clone the repository and install all required modules
 
 ```
 >> git clone https://github.com/tonyYSaliba/Software-Fault-Injector.git
 ```
-2- go to the directory: 
+2- go to the directory 
 
 ```
 >> cd Software-Fault-Injector
 ```
-3- for creating the make file type this: 
+3- for creating the make file type this 
 ```
 >> make 
 ```
-4- then type this to build the project:
+4- then type this to build the project
 
 ```
 >> cmake ../. 
 ```
-5- for running the debugger: 
+5- for running the debugger 
 ```
 >> ./sofi 
 ``` 
@@ -78,12 +80,14 @@ Any IDE that compile c++ codes
 ## Running the Debugger  
 
 
-#### Debugging with function name 
+### Debugging with function name 
 1- Enter the name of the program that you want to debug:
  you enter `unwinding`
  
-2- Then enter how you want to inject: Enter 1 or 2  
+2- Then enter how you want to inject: Enter 1 or 2 
+ 
 1 for injecting through L1 and L2 lines 
+
 2 for entering the name of function
 
 3- if you choose 2: 
@@ -104,14 +108,23 @@ you have 3 options: opcode, date, register
 
 **code, error, singno**: if the program was crashed or not 
 
-**code:0, error:0, singno:0 and no: Unknown signal** -> program executed successfuly 
+**code:0, error:0, singno:0, no: Unknown signal** -> program executed successfuly 
 
-**code:1, error:1, singno:with different numbers and no: fault explanation** -> program executed successfuly  
+**code:1, error:1, singno: with different numbers, no: fault explanation** -> program executed successfuly  
 
-#### Debugging by entering the lines  
+### Debugging by entering the lines  
 1- Enter the name of the program that you want to debug:
  you enter `stack_unwinding`
 
 2- Enter Line1 and Line2 
+
 3- Enter the injection type and number of injections
 
+
+## References
+
+- A. Vallero et al., "SyRA: Early System Reliability Analysis for Cross-Layer Soft Errors Resilience
+in Memory Arrays of Microprocessor Systems," in IEEE Transactions on Computers, vol. 68, no.
+5, pp. 765-783, 1 May 2019. 
+
+  
