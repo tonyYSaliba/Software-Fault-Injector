@@ -127,4 +127,9 @@ you have 3 options: opcode, date, register
 in Memory Arrays of Microprocessor Systems," in IEEE Transactions on Computers, vol. 68, no.
 5, pp. 765-783, 1 May 2019. 
 
+- https://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1
+
+- https://t-a-w.blogspot.com/2007/03/how-to-code-debuggers.html
+
+- http://system.joekain.com/debugger/
   
