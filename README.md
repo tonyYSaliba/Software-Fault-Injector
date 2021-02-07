@@ -52,7 +52,8 @@ Our debugger will support the following features:
 
 #### Types of Errors 
 The runtime program will be injected in the Opcode or Data.
-Injection in Opcode causes crash or hung mode (infinite loop)and injection in data causes SDC (Silent Data Corruption).
+
+Injection in Opcode causes crash or hung mode (infinite loop) and injection in data causes SDC (Silent Data Corruption).
 
 ## Getting Started
 
