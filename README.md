@@ -29,7 +29,7 @@ classification of the error will be used to feed a Bayesian Model.
 
 ## Introduction
 
-### Sofi: Software Fault Injector
+### SOFI (Software Fault Injector)
 
 #### Debugger Features
 
@@ -91,48 +91,47 @@ Any IDE that compile c++ codes
 
 ## Running the Debugger  
 
+### Injection with function name or line
+
 ### Debugging with function name 
-1- Enter the name of the program that you want to debug:
- you enter `unwinding`
+Enter the name of the program that you want to debug, you enter `unwinding`,
+
+Then enter how you want to inject: 
  
-2- Then enter how you want to inject: Enter 1 or 2 
- 
-1 for injecting through L1 and L2 lines 
+	+ 1 for injecting through L1 and L2 lines 
 
-2 for entering the name of function
+	+ 2 for entering the name of function
 
-3- if you choose 2: 
-Enter the name of function `tester`
+you should type the name of function `tester`
 
-1- Then Enter the injection type, you have 3 options: **opcode, date, register**
+Then Enter the injection type, you have 3 options: **opcode, date, register**
 
-2- Enter the number of error injections to be performed
+Enter the number of error injections to be performed
 
 
 ### Debugging by entering the lines  
-1- Enter the name of the program that you want to debug:
- you enter `stack_unwinding`
+Enter the name of the program that you want to debug, you enter `stack_unwinding`,
 
-2- Enter Line1 and Line2 
+Then Enter Line1 and Line2,
 
-3- Enter the injection type and number of injections
+you should enter the injection type and number of injections
 
 
 ### Output 
 
 You will get the responces of all the tests, this is the output: 
 
-`**tid**` Thread Id (the number of threads that were executing)
+`tid`  Thread Id, the number of threads that were executing
 
-`**halt**` 0 or 1 if there was any halt, if we choose opcode as the injection type then program will enter to the hung mode
+`halt` 0 or 1 if there was any halt, if we choose opcode as the injection type then program will enter to the hung mode
 
-`**sdc**` 0 or 1 if there was silent data corruption 
+`sdc`  0 or 1 if there was silent data corruption 
 
-`**code, error, singno**` if the program was crashed or not 
+`code, error, singno` if the program was crashed or not 
 
-`**code:0, error:0, singno:0, no: Unknown signal**` program executed successfuly 
+`code:0, error:0, singno:0, no: Unknown signal` program executed successfuly 
 
-`**code:1, error:1, singno: with different numbers, no: fault explanation**` program executed successfuly  
+`code:1, error:1, singno: with different numbers, no: fault explanation` program executed successfuly  
 
 
 ## References
