@@ -1,9 +1,14 @@
 ## Contents
-[About The Project](#About-The-Project)
-[link](#Introduction)
-[link](#Getting-Started)
-[link](#Running-the-Debugger)
-[link](#References)
+-[About The Project](#About-The-Project)
+
+-[Introduction](#Introduction)
+
+-[Getting Started](#Getting-Started)
+
+-[Running the Debugger](#Running-the-Debugger)
+
+-[References](#References)
+
 
 
 ## About The Project
