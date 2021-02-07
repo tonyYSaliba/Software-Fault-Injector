@@ -105,7 +105,7 @@ Then enter how you want to inject:
 
 you should type the name of function `tester`
 
-Then Enter the injection type, you have 3 options: **opcode, date, register**
+Then Enter the injection type, you have 3 options: **opcode, data, register**
 
 Enter the number of error injections to be performed
 
