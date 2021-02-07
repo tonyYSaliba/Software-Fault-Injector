@@ -1,16 +1,13 @@
 ## Contents
-+[About The Project](#About-The-Project)
 
-+[Introduction](#Introduction)
-
-+[Getting Started](#Getting-Started)
-
-+[Running the Debugger](#Running-the-Debugger)
-	+[Debugging with function name](#Debugging-with-function-name)
-	+[Debugging by entering the lines](#Debugging-by-entering-the-lines)
-	+[Output](#Output)
-+[References](#References)
-
++  [About The Project](#About-The-Project)
++ [Introduction](#Introduction)
++ [Getting Started](#Getting-Started)
++ [Running the Debugger](#Running-the-Debugger)	
+    + [Debugging with function name](#Debugging-with-function-name)
+    + [Debugging by entering the lines](#Debugging-by-entering-the-lines)
+	+ [Output](#Output)
++ [References](#References)
 
 
 ## About The Project
