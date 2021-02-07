@@ -105,8 +105,7 @@ Any IDE that compile c++ codes
 3- if you choose 2: 
 Enter the name of function `tester`
 
-1- Then Enter the injection type: 
-you have 3 options: opcode, date, register
+1- Then Enter the injection type, you have 3 options: **opcode, date, register**
 
 2- Enter the number of error injections to be performed
 
@@ -124,17 +123,17 @@ you have 3 options: opcode, date, register
 
 You will get the responces of all the tests, this is the output: 
 
-**tid**: Thread Id (the number of threads that were executing)
+`**tid**` Thread Id (the number of threads that were executing)
 
-**halt**: 0 or 1 if there was any halt, if we choose opcode as the injection type then program will enter to the hung mode
+`**halt**` 0 or 1 if there was any halt, if we choose opcode as the injection type then program will enter to the hung mode
 
-**sdc**: 0 or 1 if there was silent data corruption 
+`**sdc**` 0 or 1 if there was silent data corruption 
 
-**code, error, singno**: if the program was crashed or not 
+`**code, error, singno**` if the program was crashed or not 
 
-**code:0, error:0, singno:0, no: Unknown signal**: program executed successfuly 
+`**code:0, error:0, singno:0, no: Unknown signal**` program executed successfuly 
 
-**code:1, error:1, singno: with different numbers, no: fault explanation**: program executed successfuly  
+`**code:1, error:1, singno: with different numbers, no: fault explanation**` program executed successfuly  
 
 
 ## References
