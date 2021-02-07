@@ -1,5 +1,5 @@
 ## Contents
-[link](#About-The-Project)
+[About The Project](#About-The-Project)
 [link](#Introduction)
 [link](#Getting-Started)
 [link](#Running-the-Debugger)
