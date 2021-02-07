@@ -79,7 +79,6 @@ Any IDE that compile c++ codes
 
 ## Running the Debugger  
 
-
 ### Debugging with function name 
 1- Enter the name of the program that you want to debug:
  you enter `unwinding`
@@ -98,7 +97,19 @@ you have 3 options: opcode, date, register
 
 2- Enter the number of error injections to be performed
 
-3- You will get the responces of all the tests, this is the output: 
+
+### Debugging by entering the lines  
+1- Enter the name of the program that you want to debug:
+ you enter `stack_unwinding`
+
+2- Enter Line1 and Line2 
+
+3- Enter the injection type and number of injections
+
+
+### Output 
+
+You will get the responces of all the tests, this is the output: 
 
 **tid**: Thread Id (the number of threads that were executing)
 
@@ -108,17 +119,9 @@ you have 3 options: opcode, date, register
 
 **code, error, singno**: if the program was crashed or not 
 
-**code:0, error:0, singno:0, no: Unknown signal** -> program executed successfuly 
+**code:0, error:0, singno:0, no: Unknown signal**: program executed successfuly 
 
-**code:1, error:1, singno: with different numbers, no: fault explanation** -> program executed successfuly  
-
-### Debugging by entering the lines  
-1- Enter the name of the program that you want to debug:
- you enter `stack_unwinding`
-
-2- Enter Line1 and Line2 
-
-3- Enter the injection type and number of injections
+**code:1, error:1, singno: with different numbers, no: fault explanation**: program executed successfuly  
 
 
 ## References
