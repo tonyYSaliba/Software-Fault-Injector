@@ -1,3 +1,11 @@
+## Contents
+[link](#About-The-Project)
+[link](#Introduction)
+[link](#Getting-Started)
+[link](#Running-the-Debugger)
+[link](#References)
+
+
 ## About The Project
 
 ### Project: Software Fault Injector with advanced Operating Systems capabilities
