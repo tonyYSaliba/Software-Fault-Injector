@@ -51,7 +51,8 @@ Our debugger will support the following features:
 + Multi-threaded debugging support
 
 #### Types of Errors 
-The runtime program will be injected in the Opcode or Data. Injection in Opcode causes crash or hung mode (infinite loop) and injection in data causes SDC (Silent Data Corruption) 
+The runtime program will be injected in the Opcode or Data.
+Injection in Opcode causes crash or hung mode (infinite loop)and injection in data causes SDC (Silent Data Corruption).
 
 ## Getting Started
 
@@ -91,16 +92,15 @@ Any IDE that compile c++ codes
 
 ## Running the Debugger  
 
-### Injection with function name or line
 
 ### Debugging with function name 
-Enter the name of the program that you want to debug, you enter `unwinding`,
+Enter the name of the program that you want to debug, you enter `unwinding`
 
 Then enter how you want to inject: 
  
-	+ 1 for injecting through L1 and L2 lines 
-
-	+ 2 for entering the name of function
+1 for injecting through L1 and L2 lines
+ 
+2 for entering the name of function
 
 you should type the name of function `tester`
 
@@ -110,9 +110,9 @@ Enter the number of error injections to be performed
 
 
 ### Debugging by entering the lines  
-Enter the name of the program that you want to debug, you enter `stack_unwinding`,
+Enter the name of the program that you want to debug, you enter `stack_unwinding`
 
-Then Enter Line1 and Line2,
+Then Enter Line1 and Line2
 
 you should enter the injection type and number of injections
 
