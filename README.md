@@ -3,6 +3,7 @@
 +  [About The Project](#About-The-Project)
 + [Introduction](#Introduction)
 + [Getting Started](#Getting-Started)
++ [Dependencies](#Dependencies)
 + [Running the Debugger](#Running-the-Debugger)	
     + [Debugging with function name](#Debugging-with-function-name)
     + [Debugging by entering the lines](#Debugging-by-entering-the-lines)
@@ -91,7 +92,7 @@ This software is carried out in C++. You can run it in Linux or Windows with C++
 Any IDE that compile c++ codes
 
 
-### Dependencies 
+## Dependencies 
 + Linenoise: For handling our command line input
 + libelfin:  For parsing the debug information
 
