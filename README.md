@@ -91,31 +91,35 @@ This software is carried out in C++. You can run it in Linux or Windows with C++
 Any IDE that compile c++ codes
 
 
+### Dependencies 
++ Linenoise: For handling our command line input
++ libelfin:  For parsing the debug information
+
 ## Running the Debugger  
 
 
 ### Debugging with function name 
-Enter the name of the program that you want to debug, you enter `unwinding`
++ Enter the name of the program that you want to debug, you enter `unwinding`
 
-Then enter how you want to inject: 
++ Then enter how you want to inject: 
  
 1 for injecting through L1 and L2 lines
  
 2 for entering the name of function
 
-you should type the name of function `tester`
++ you should type the name of function `tester`
 
-Then Enter the injection type, you have 3 options: **opcode, data, register**
++ Then Enter the injection type, you have 3 options: **opcode, data, register**
 
-Enter the number of error injections to be performed
++ Enter the number of error injections to be performed
 
 
 ### Debugging by entering the lines  
-Enter the name of the program that you want to debug, you enter `stack_unwinding`
++ Enter the name of the program that you want to debug, you enter `stack_unwinding`
 
-Then Enter Line1 and Line2
++ Then Enter Line1 and Line2
 
-you should enter the injection type and number of injections
++ you should enter the injection type and number of injections
 
 
 ### Output 
@@ -136,9 +140,6 @@ You will get the responces of all the tests, this is the output:
 
 ## References
 
-- A. Vallero et al., "SyRA: Early System Reliability Analysis for Cross-Layer Soft Errors Resilience
-in Memory Arrays of Microprocessor Systems," in IEEE Transactions on Computers, vol. 68, no.
-5, pp. 765-783, 1 May 2019. 
 
 - https://eli.thegreenplace.net/2011/01/23/how-debuggers-work-part-1
 
