@@ -9,6 +9,7 @@
     + [Debugging with function name](#Debugging-with-function-name)
     + [Debugging by entering the lines](#Debugging-by-entering-the-lines)
 	+ [Output](#Output)
++ [Screenshot of output](#Screenshot-of-output)
 + [References](#References)
 
 
@@ -144,9 +145,9 @@ You will get the responces of all the tests, this is the output:
 | code:0, error:0, singno:0, no: Unknown signal    | if all the fields are 0 and no:Unknown signal, means the program executed successfuly |
 | code:1, error:1, singno: with different numbers, no: fault explanation    | program is not executed successfuly|
 
-## Screenshot of Output 
+## Screenshot of output 
 
-one sample output for Opcode injection
+The sample output for Opcode injection
 
 ![Screenshot](https://i.ibb.co/2SGbF1C/output.jpg)
 
