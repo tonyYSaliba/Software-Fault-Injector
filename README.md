@@ -2,6 +2,7 @@
 
 +  [About The Project](#About-The-Project)
 + [Introduction](#Introduction)
++ [Prerequisites](#Prerequisites) 
 + [Getting Started](#Getting-Started)
 + [Dependencies](#Dependencies)
 + [Running the Debugger](#Running-the-Debugger)	
@@ -56,6 +57,16 @@ The runtime program will be injected in the Opcode or Data.
 
 Injection in Opcode causes crash or hung mode (infinite loop) and injection in data causes SDC (Silent Data Corruption).
 
+
+## Prerequisites 
+
+#### Working Environment 
+This software is carried out in C++. You can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL)
+
+#### IDE
+Any IDE that compile c++ codes
+
+
 ## Getting Started
 
 Clone the repository and install all required modules
@@ -82,14 +93,6 @@ Run the debugger
 >> ./sofi 
 ``` 
 
-
-### Prerequisites 
-
-#### Working Environment 
-This software is carried out in C++. You can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL)
-
-#### IDE
-Any IDE that compile c++ codes
 
 
 ## Dependencies 
