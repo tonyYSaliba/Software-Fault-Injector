@@ -55,15 +55,15 @@ Our debugger will support the following features:
 
 #### Types of Errors 
 The runtime program will be injected through these types of errors:
-+ Opcode: Causes crash or hung mode (infinite loop)
-+ Data: Causes SDC (Silent Data Corruption)
++ Opcode: causes crash or hung mode (infinite loop)
++ Data: causes SDC (Silent Data Corruption)
  
 
 
 ## Prerequisites 
 
 #### Working Environment 
-This software is carried out in C++. You can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL)
+This software is carried out in C++, you can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL)
 
 #### IDE
 Any IDE that compile c++ codes
