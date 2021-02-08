@@ -99,7 +99,7 @@ Any IDE that compile c++ codes
 
 
 ### Debugging with function name 
-+ Enter the name of the program that you want to debug, you enter `unwinding`
++ Enter the name of the program that you want to debug, you enter `unwinding.cpp`
 
 + Then enter how you want to inject: 
  
@@ -113,13 +113,17 @@ Any IDE that compile c++ codes
 
 + Enter the number of error injections to be performed
 
++ After the certain timeout the output will be printed 
+
 
 ### Debugging by entering the lines  
-+ Enter the name of the program that you want to debug, you enter `stack_unwinding`
++ Enter the name of the program that you want to debug, you enter `stack_unwinding.cpp`
 
-+ Then Enter Line1 and Line2
++ Then choose two lines for injecting, enter the line number for Line1 and Line2
 
-+ you should enter the injection type and number of injections
++ You should enter the injection type (**opcode, data, register**)
+
++ Enter the number of injections
 
 
 ### Output 
@@ -131,10 +135,11 @@ You will get the responces of all the tests, this is the output:
 | ------ | ----------- |
 | tid   | Thread Id, to show the number of threads that were executing |
 | halt | 0 or 1, It is 1 if there is any halt, if we choose opcode as the injection type then program will enter to the hung mode |
+| duration    | Duration time for thread execution, 0 for less than 1 second |
 | sdc    | 0 or 1 if there is silent data corruption |
-| code, error, singno    | if the program is crashed or not |
-| code:0, error:0, singno:0, no: Unknown signal    | program executed successfuly |
-| code:1, error:1, singno: with different numbers, no: fault explanation    | program executed successfuly|
+| code, error, singno, no    | To show if the program is crashed or not, no field explains what is happend inside the program|
+| code:0, error:0, singno:0, no: Unknown signal    | if all the fields are 0 and no:Unknown signal, means the program executed successfuly |
+| code:1, error:1, singno: with different numbers, no: fault explanation    | program is not executed successfuly|
 
 
 
