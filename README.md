@@ -122,17 +122,16 @@ you should enter the injection type and number of injections
 
 You will get the responces of all the tests, this is the output: 
 
-`tid`  Thread Id, the number of threads that were executing
 
-`halt` 0 or 1 if there was any halt, if we choose opcode as the injection type then program will enter to the hung mode
+| Option | Description |
+| ------ | ----------- |
+| tid   | Thread Id, to show the number of threads that were executing |
+| halt | 0 or 1, It is 1 if there is any halt, if we choose opcode as the injection type then program will enter to the hung mode |
+| sdc    | 0 or 1 if there is silent data corruption |
+| code, error, singno    | if the program is crashed or not |
+| code:0, error:0, singno:0, no: Unknown signal    | program executed successfuly |
+| code:1, error:1, singno: with different numbers, no: fault explanation    | program executed successfuly|
 
-`sdc`  0 or 1 if there was silent data corruption 
-
-`code, error, singno` if the program was crashed or not 
-
-`code:0, error:0, singno:0, no: Unknown signal` program executed successfuly 
-
-`code:1, error:1, singno: with different numbers, no: fault explanation` program executed successfuly  
 
 
 ## References
