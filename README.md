@@ -57,26 +57,26 @@ Injection in Opcode causes crash or hung mode (infinite loop) and injection in d
 
 ## Getting Started
 
-1- clone the repository and install all required modules
+Clone the repository and install all required modules
 
 ```
 >> git clone https://github.com/tonyYSaliba/Software-Fault-Injector.git
 ```
-2- go to the directory 
+Go to the directory 
 
 ```
 >> cd Software-Fault-Injector
 ```
-3- for creating the make file type this 
+For creating make file 
 ```
 >> make 
 ```
-4- then type this to build the project
+Then type this to build the project
 
 ```
 >> cmake ../. 
 ```
-5- for running the debugger 
+Run the debugger 
 ```
 >> ./sofi 
 ``` 
@@ -103,9 +103,9 @@ Any IDE that compile c++ codes
 
 + Then enter how you want to inject: 
  
-1 for injecting through L1 and L2 lines
+	1 for injecting through L1 and L2 lines
  
-2 for entering the name of function
+	2 for entering the name of function
 
 + you should type the name of function `tester`
 
