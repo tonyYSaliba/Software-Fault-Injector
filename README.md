@@ -15,7 +15,7 @@
 
 ## About The Project
 
-### Project: Software Fault Injector with advanced Operating Systems capabilities
+### Software Fault Injector with advanced Operating Systems capabilities
 #### Problem Definition
 Hardware failures can introduce errors due to several kinds of faults that can affect the software
 during its execution. While it is quite easy to study the effect of the fault at hardware level, it is far
@@ -54,8 +54,10 @@ Our debugger will support the following features:
 + Multi-threaded debugging support
 
 #### Types of Errors 
-The runtime program will be injected in the Opcode or Data.
-Injection in Opcode causes crash or hung mode (infinite loop) and injection in data causes SDC (Silent Data Corruption).
+The runtime program will be injected through these types of errors:
++ Opcode: Causes crash or hung mode (infinite loop)
++ Data: Causes SDC (Silent Data Corruption)
+ 
 
 
 ## Prerequisites 
@@ -69,7 +71,7 @@ Any IDE that compile c++ codes
 
 ## Getting Started
 
-Clone the repository and install all required modules
+Clone the repository
 
 ```
 >> git clone https://github.com/tonyYSaliba/Software-Fault-Injector.git
@@ -123,7 +125,7 @@ Run the debugger
 ### Debugging by entering the lines  
 + Enter the name of the program that you want to debug, you enter `stack_unwinding.cpp`
 
-+ Then choose two lines for injecting, enter the line number for Line1 and Line2
++ Then choose two lines for injecting, enter line number for Line1 and Line2
 
 + You should enter the injection type (**opcode, data, register**)
 
@@ -132,7 +134,7 @@ Run the debugger
 
 ### Output 
 
-You will get the responces of all the tests, this is the output: 
+You will get the responces of all the tests, these are the output options: 
 
 
 | Option | Description |
