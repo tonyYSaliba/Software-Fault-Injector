@@ -256,7 +256,7 @@ void debugger::write_memory(uint64_t address, uint64_t value) {
     ptrace(PTRACE_POKEDATA, m_pid, address, value);
 }
 
-uint64_t debugger::get_pc() {
+uint64_t debugger::get_pc() { // get program counter
     return get_register_value(m_pid, reg::rip);
 }
 
@@ -264,11 +264,11 @@ uint64_t debugger::get_offset_pc() {
    return offset_load_address(get_pc());
 }
 
-void debugger::set_pc(uint64_t pc) {
+void debugger::set_pc(uint64_t pc) { // chnage program counter (used in handling breakpoints)
     set_register_value(m_pid, reg::rip, pc);
 }
 
-dwarf::die debugger::get_function_from_pc(uint64_t pc) {
+dwarf::die debugger::get_function_from_pc(uint64_t pc) { // get function using program counter
     for (auto &cu : m_dwarf.compilation_units()) {
         if (die_pc_range(cu.root()).contains(pc)) {
             for (const auto& die : cu.root()) {
@@ -295,7 +295,7 @@ dwarf::die debugger::get_function_from_pc(uint64_t pc) {
     throw std::out_of_range{"Cannot find function"};
 }
 
-dwarf::die debugger::get_function_from_name(const std::string& name) {
+dwarf::die debugger::get_function_from_name(const std::string& name) { // find function using its name
     for (const auto& cu : m_dwarf.compilation_units()) {
         for (const auto& die : cu.root()) {
             if (die.has(dwarf::DW_AT::name) && at_name(die) == name) {
@@ -309,7 +309,7 @@ dwarf::die debugger::get_function_from_name(const std::string& name) {
 
 
 
-dwarf::line_table::iterator debugger::get_line_entry_from_pc(uint64_t pc) {
+dwarf::line_table::iterator debugger::get_line_entry_from_pc(uint64_t pc) { // gets line using program counter
     for (auto &cu : m_dwarf.compilation_units()) {
         if (die_pc_range(cu.root()).contains(pc)) {
             auto &lt = cu.get_line_table();
@@ -326,7 +326,7 @@ dwarf::line_table::iterator debugger::get_line_entry_from_pc(uint64_t pc) {
     throw std::out_of_range{"Cannot find line entry"};
 }
 
-void debugger::print_source(const std::string& file_name, unsigned line, unsigned n_lines_context) {
+void debugger::print_source(const std::string& file_name, unsigned line, unsigned n_lines_context) { // prints the lines of ccode that are near the current program counter. (Used for testing purposes only)
     std::ifstream file {file_name};
 
     //Work out a window around the desired line
@@ -433,20 +433,20 @@ void debugger::continue_execution_single_step() {
     wait_for_signal();
 }
 
-void debugger::dump_registers() {
+void debugger::dump_registers() { // print out all registers (used for testing purposes)
     for (const auto& rd : g_register_descriptors) {
         std::cout << rd.name << " 0x"
                   << std::setfill('0') << std::setw(16) << std::hex << get_register_value(m_pid, rd.r) << std::endl;
     }
 }
 
-bool is_suffix(const std::string& s, const std::string& of) {
+bool is_suffix(const std::string& s, const std::string& of) { // utility function
     if (s.size() > of.size()) return false;
     auto diff = of.size() - s.size();
     return std::equal(s.begin(), s.end(), of.begin() + diff);
 }
 
-void debugger::set_breakpoint_at_function(const std::string& name) {
+void debugger::set_breakpoint_at_function(const std::string& name) { //sets breapont using function name
     for (const auto& cu : m_dwarf.compilation_units()) {
         for (const auto& die : cu.root()) {
             if (die.has(dwarf::DW_AT::name) && at_name(die) == name) {
@@ -498,7 +498,7 @@ void debugger::get_function_start_and_end_addresses(const std::string& name, std
 
 
 
-void debugger::set_breakpoint_at_source_line(const std::string& file, unsigned line) {
+void debugger::set_breakpoint_at_source_line(const std::string& file, unsigned line) { // sets breakpoint using line of code
     for (const auto& cu : m_dwarf.compilation_units()) {
         if (is_suffix(file, at_name(cu.root()))) {
             const auto& lt = cu.get_line_table();
@@ -513,7 +513,7 @@ void debugger::set_breakpoint_at_source_line(const std::string& file, unsigned l
     }
 }
 
-void debugger::get_alligned_address(std::intptr_t& addr) {
+void debugger::get_alligned_address(std::intptr_t& addr) { // gets the useful address to set the mutation target
     for (const auto& cu : m_dwarf.compilation_units()) {
         
         const auto& lt = cu.get_line_table();
@@ -528,7 +528,7 @@ void debugger::get_alligned_address(std::intptr_t& addr) {
     }
 }
 
-void debugger::get_address_at_source_line(const std::string& file, unsigned line, intptr_t& addr) {
+void debugger::get_address_at_source_line(const std::string& file, unsigned line, intptr_t& addr) { // gets address using the line of code
     for (const auto& cu : m_dwarf.compilation_units()) {
         if (is_suffix(file, at_name(cu.root()))) {
             const auto& lt = cu.get_line_table();
@@ -543,24 +543,29 @@ void debugger::get_address_at_source_line(const std::string& file, unsigned line
     }
 }
 
-void debugger::set_breakpoint_at_address(std::intptr_t addr) {
+void debugger::set_breakpoint_at_address(std::intptr_t addr) { // sets breakpoint at a certain address
     // std::cout << "Set breakpoint at address 0x" << std::hex << addr << std::endl;
     breakpoint bp {m_pid, addr};
     bp.enable();
     m_breakpoints[addr] = bp;
 }
 
-void debugger::run() {
+void debugger::run() { //used to initialize the debugger
     wait_for_signal();
     initialise_load_address();
 }
 
-void debugger::mutate_opcode(std::intptr_t addr) {
+void debugger::mutate_opcode(std::intptr_t addr) { //opcode is changed at a random address
     int randomOpcode = rand() % 0xFF;   
     write_memory(addr, (read_memory(addr) & ~0xFF)|randomOpcode);
 }
 
 void debugger::mutate_register(std::intptr_t addr) {
+    /*
+This function is runned at the start of the program.
+First, we have a random address 'addr', we set a breakpoint on that address, and we continue our execution normally.
+When the breakpoint is hit we pick a random regiter to mutate.
+*/
     set_breakpoint_at_address(addr);
     continue_execution();
     int randomRegister = rand() % 27 ;
@@ -568,7 +573,12 @@ void debugger::mutate_register(std::intptr_t addr) {
     set_register_value(m_pid, get_register_from_name(g_register_descriptors[randomRegister].name), randomValue);
 }
 
-void debugger::mutate_data(std::intptr_t addr){
+void debugger::mutate_data(std::intptr_t addr){ // mutates data
+/*
+This function is runned at the start of the program.
+First, we have a random address 'addr', we set a breakpoint on that address, and we continue our execution normally.
+When the breakpoint is hit, we get the available variables (locally defined variables and arguments), and pick a random one to mutate.
+*/
 
     set_breakpoint_at_address(addr);
     continue_execution();
@@ -580,7 +590,7 @@ void debugger::mutate_data(std::intptr_t addr){
     write_memory(variables[i], (read_memory(variables[i]) +(rand()%10 +1)));
 }
 
-void execute_debugee (const std::string& prog_name) {
+void execute_debugee (const std::string& prog_name) { // used to start tracing the debugee
     if (ptrace(PTRACE_TRACEME, 0, 0, 0) < 0) {
         std::cerr << "Error in ptrace\n";
         return;
@@ -607,10 +617,10 @@ void go() {
   ready = true;
   cv.notify_all();
 }
-int get_ttl(int duration, int number_of_tests){
+int get_ttl(int duration, int number_of_tests){ // used to calculate INFINITY value. But, we will be using INFINITY as 10 seconds. If you want to change the value of INFINITY, just change the value inside 'define INFINITY' at the start of the code.
     return (duration+1)*number_of_tests;
 }
-void set_timeout(int seconds){
+void set_timeout(int seconds){ // used to emulate halt mode (it puts the thread into sleep)
     std::this_thread::sleep_for(std::chrono::seconds(seconds));
 }
 string convertToString(char* a, int size) { 
