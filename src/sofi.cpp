@@ -621,84 +621,82 @@ string convertToString(char* a, int size) {
     } 
     return s; 
 } 
-void thread_function(void *arguments) {
+void thread_function(void *arguments) { // main function of a thread
     struct thread_arguments *args = (struct thread_arguments *)arguments;
 
-    auto start = high_resolution_clock::now(); 
+    auto start = high_resolution_clock::now(); //used to calculate the runtime duration
 
-    long tid;
+    long tid; // thread ID
     tid = args->tid;
 
-    int filedesOut[2];
-    int filedesErr[2];
+    int filedesOut[2]; // Used to get std::cout of the debuggee 
+    int filedesErr[2]; // Used to get std:cerr of the debuggee
 
-    if (pipe(filedesOut) == -1) {
+    if (pipe(filedesOut) == -1) { // creation of pipes for communication for cout
         perror("pipe");
         exit(1);
     }
-    if (pipe(filedesErr) == -1) {
+    if (pipe(filedesErr) == -1) { // creation of pipes for communication for cerr
         perror("pipe");
         exit(1);
     }
     /* Set O_NONBLOCK flag for the read end (pfd[0]) of the pipe. */
-    if (fcntl(filedesOut[0], F_SETFL, O_NONBLOCK) == -1) {
+    if (fcntl(filedesOut[0], F_SETFL, O_NONBLOCK) == -1) { // for cout
         fprintf(stderr, "Call to fcntl failed.\n");
         exit(1);
     }
-     if (fcntl(filedesErr[0], F_SETFL, O_NONBLOCK) == -1) {
+     if (fcntl(filedesErr[0], F_SETFL, O_NONBLOCK) == -1) { // for cerr
         fprintf(stderr, "Call to fcntl failed.\n");
         exit(1);
     }
 
     auto pid = fork();
-    if (pid == 0) {
+    if (pid == 0) { // child will become the debuggee
         //child
         while ((dup2(filedesOut[1], STDOUT_FILENO) == -1) && (errno == EINTR)) {}
         while ((dup2(filedesErr[1], STDERR_FILENO) == -1) && (errno == EINTR)) {}
-        // close(filedesOut[1]);
         close(filedesOut[0]);
-        // close(filedesErr[1]);
         close(filedesErr[0]);
-        personality(ADDR_NO_RANDOMIZE);
-        execute_debugee(args->prog);
+        personality(ADDR_NO_RANDOMIZE); // to remove address randomization
+        execute_debugee(args->prog); // begin debuggee (execl)
     }
     else if (pid >= 1)  {
         //parent
         // std::cout << "Start process " << pid << " on thread "<<tid<<endl;
         debugger dbg{args->prog, pid};
-        dbg.run();
-        args->debuggers[tid] = dbg;
+        dbg.run(); // run debugger
+        args->debuggers[tid] = dbg; // store thread's debugger object to the thread
         // debugger& dbg = (args->debuggers[tid]);
 
         intptr_t addr1;
         intptr_t addr2;
         intptr_t addr;
 
-        if(args->inputType == 1){
+        if(args->inputType == 1){ // inject errors using source lines
             dbg.get_address_at_source_line(args->fileName, args->L1, addr1);
             dbg.get_address_at_source_line(args->fileName, args->L2, addr2);
             addr = addr1 + rand() % ((addr2 - addr1) +1);
             dbg.get_alligned_address(addr);
         }
-        else if (args->inputType == 2){
+        else if (args->inputType == 2){ // inject errors using function name
             dbg.get_function_start_and_end_addresses(args->functionName,addr1, addr2);
             addr = addr1 + rand() % ((addr2 - addr1) +1);
             dbg.get_alligned_address(addr);
         }
 
-        if (args->injectionType == "Opcode"){
+        if (args->injectionType == "Opcode"){ // Opcode error injection
             dbg.mutate_opcode(addr);
         }
-        else if (args->injectionType == "Register"){
+        else if (args->injectionType == "Register"){ // mutation inside random registers error injection
             dbg.mutate_register(addr);
         }
-        else if (args->injectionType == "Data"){
+        else if (args->injectionType == "Data"){// random data corruption error injection
             dbg.mutate_data(addr);        
         }
         else if (args->injectionType == "init"){
             // cout<<"golden code: "<<tid<<endl;
         }
-        else if (args->injectionType == "test"){
+        else if (args->injectionType == "test"){ // for testing purposes
             if(tid == 5){
                 set_timeout(15);
             }
@@ -707,8 +705,8 @@ void thread_function(void *arguments) {
         close(filedesOut[1]);
         close(filedesErr[1]);
 
-        char bufferOut[BUFFER_SIZE];
-        char bufferErr[BUFFER_SIZE];
+        char bufferOut[BUFFER_SIZE]; // used to store cout
+        char bufferErr[BUFFER_SIZE]; // used to store cerr
 
         dbg.step_over_breakpoint();
         ptrace(PTRACE_CONT, dbg.m_pid, nullptr, nullptr);
@@ -748,14 +746,17 @@ void thread_function(void *arguments) {
 }
 
 
-void *thread_function_init(void *arguments) {
+void *thread_function_init(void *arguments) { // function used while initializing the threads 
     struct thread_arguments *args = (struct thread_arguments *)arguments;
 
+    // The below lines of code are used to set timeout on the thread's execution in a graceful way (clean way).
+    // if the running time becomes bigger than INFINITY, the debugee will stop on executing, and the debugger wil consider that we are in halt mode.
     if(args->tid){
         std::unique_lock<std::mutex> lck(mtx);
         while (!ready) cv.wait(lck);
     }
 
+    // function used to execute the main fuction of the thread.
     std::future<void> future = std::async(std::launch::async, [arguments](){ 
         thread_function(arguments);
     }); 
