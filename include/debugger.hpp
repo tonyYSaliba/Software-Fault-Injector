@@ -62,10 +62,6 @@ namespace sofi {
 
         void single_step_instruction();
         void single_step_instruction_with_breakpoint_check();
-        void step_in();
-        void step_over();
-        void step_out();
-        void remove_breakpoint(std::intptr_t addr);
 
         void get_address_at_source_line(const std::string& file, unsigned line, intptr_t& addr);
         void single_step(); 
