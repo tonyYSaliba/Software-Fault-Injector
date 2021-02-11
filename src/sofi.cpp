@@ -200,39 +200,6 @@ void debugger::step_in() {
    print_source(line_entry->file->path, line_entry->line);
 }
 
-void debugger::step_over() {
-    auto func = get_function_from_pc(get_offset_pc());
-    auto func_entry = at_low_pc(func);
-    auto func_end = at_high_pc(func);
-
-    auto line = get_line_entry_from_pc(func_entry);
-    auto start_line = get_line_entry_from_pc(get_offset_pc());
-
-    std::vector<std::intptr_t> to_delete{};
-
-    while (line->address < func_end) {
-        auto load_address = offset_dwarf_address(line->address);
-        if (line->address != start_line->address && !m_breakpoints.count(load_address)) {
-            set_breakpoint_at_address(load_address);
-            to_delete.push_back(load_address);
-        }
-        ++line;
-    }
-
-    auto frame_pointer = get_register_value(m_pid, reg::rbp);
-    auto return_address = read_memory(frame_pointer+8);
-    if (!m_breakpoints.count(return_address)) {
-        set_breakpoint_at_address(return_address);
-        to_delete.push_back(return_address);
-    }
-
-    continue_execution();
-
-    for (auto addr : to_delete) {
-        remove_breakpoint(addr);
-    }
-}
-
 void debugger::single_step_instruction() {
     ptrace(PTRACE_SINGLESTEP, m_pid, nullptr, nullptr);
     wait_for_signal();
