@@ -73,7 +73,6 @@ namespace sofi {
         dwarf::die get_function_from_name(const std::string& name);
         void mutate_data(std::intptr_t addr);
 
-    // private:
         void handle_command(const std::string& line);
         void continue_execution();
         auto get_pc() -> uint64_t;
