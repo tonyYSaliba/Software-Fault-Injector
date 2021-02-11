@@ -63,7 +63,7 @@ The runtime program will be injected through these types of errors:
 ## Prerequisites 
 
 #### Working Environment 
-This software is carried out in C++, you can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL)
+This software is carried out in C++. you can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL)
 
 #### IDE
 Any IDE that compile c++ codes
@@ -81,15 +81,17 @@ Go to the directory
 ```
 >> cd Software-Fault-Injector
 ```
-For creating make file 
-```
->> make 
-```
 Then type this to build the project
 
 ```
 >> cmake ../. 
 ```
+
+For creating make file 
+```
+>> make 
+```
+
 Run the debugger 
 ```
 >> ./sofi 
