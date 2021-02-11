@@ -25,8 +25,8 @@
 #include <thread>
 #include <chrono>
 
-#include <mutex>              // std::mutex, std::unique_lock
-#include <condition_variable> // std::condition_variable
+#include <mutex>              
+#include <condition_variable> 
 
 using namespace std::chrono_literals;
 using namespace std::chrono; 
@@ -39,8 +39,8 @@ using namespace std::chrono;
 using namespace sofi;
 using namespace std;
 
-#define INFINITY 10
-#define BUFFER_SIZE 4096
+#define INFINITY 10 // Allowed duration of runtime (in seconds). After 10 seconds, SOFI considers that we entered hault mode.  
+#define BUFFER_SIZE 4096 // Maximum amount of output.
 
 std::mutex mtx;
 std::condition_variable cv;
@@ -801,11 +801,11 @@ void print_header(){
     <<"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"<<endl
     <<endl;
 }
-int main(int argc, char* argv[]) {
-    print_header();
-    srand(time(0));
+int main(int argc, char* argv[]) { // main function for program SOFI.
+    print_header(); // prints the SOFI title.
+    srand(time(0)); // to enable random fault injections.
 
-    thread_arguments init_vars;
+    thread_arguments init_vars; // arguments used during thread initialization.
 
     do{
         cout    << "Please enter name of the program that you want to debug..." << endl;
@@ -849,8 +849,8 @@ int main(int argc, char* argv[]) {
 
     int rc;
     int i;
-    pthread_t* threads = new pthread_t[init_vars.numberOfTests + 1];
-    debugger* debuggers = new debugger[init_vars.numberOfTests + 1];
+    pthread_t* threads = new pthread_t[init_vars.numberOfTests + 1]; // creation of threads that will handle the fault injections.
+    debugger* debuggers = new debugger[init_vars.numberOfTests + 1]; // To each thread, we have his own debugger object that will be handling the fault injection.
     pthread_attr_t attr;
     void *status;
     init_vars.debuggers = debuggers;
@@ -860,10 +860,9 @@ int main(int argc, char* argv[]) {
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    for( i = 0; i < init_vars.numberOfTests + 1; i++ ) {
-        // cout << "main() : creating thread, " << i << endl;
+    for( i = 0; i < init_vars.numberOfTests + 1; i++ ) { // Create the threads.
         init_vars_arr[i] = init_vars;
-        if(i == 0){
+        if(i == 0){ // this iteration is made for the golden execution, to get the correct output data (for SDC ~ silent data corruption)
             init_vars_arr[i].injectionType = "init";
         }
         init_vars_arr[i].tid = i;
@@ -885,18 +884,13 @@ int main(int argc, char* argv[]) {
         // cout << "Main: completed thread id :" << i ;
         // cout << "  exiting with status :" << status << endl;
     }
-    cout<<"***********************************************************"<<endl;
+    cout<<"***********************************************************"<<endl; // Print results
     for(int i=0; i<init_vars.numberOfTests + 1; i++){
         cout<<"- tid: "<<i<<" - halt: "<<debuggers[i].halt_mode<<" - duration: "<<debuggers[i].duration<<" - sdc: "<<debuggers[i].sdc<<" - code: "<<debuggers[i].result.si_code<<" - errno: "<<debuggers[i].result.si_code<<" - singno: "<<debuggers[i].result.si_signo<<" - no: "<<strsignal(debuggers[i].result.si_signo)<<endl;
     }
     cout<<"***********************************************************"<<endl;
 
     cout << "Main: program exiting." << endl;
-    // for(int i=0; i<init_vars.numberOfTests+1;i++){
-    //     cout<<"+ "<<i<<endl;
-    //     cout<<debuggers[i].originalOut<<endl;
-    //     cout<<"----------------------"<<endl;
-    // }
     pthread_exit(NULL);
 
     return 0;
