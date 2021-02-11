@@ -783,7 +783,7 @@ void *thread_function_init(void *arguments) {
     go();
     pthread_exit(NULL);
 }
-void print_header(){
+void print_header(){ // SOFI header
     cout
     <<"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"<<endl
     <<"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM"<<endl

@@ -53,7 +53,8 @@
         "ratio": "cpp",
         "future": "cpp",
         "mutex": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "iostream": "cpp"
     },
     "workbench.colorCustomizations": {
         "activityBar.activeBackground": "#65c89b",
