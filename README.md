@@ -107,54 +107,48 @@ Run the debugger
 
 
 ## Dependencies 
-+ Linenoise: For handling our command line input
 + libelfin:  For parsing the debug information
 
 ## Running the Debugger  
 
 
 ### Debugging with function name 
-+ Enter the name of the program that you want to debug, you enter `unwinding.cpp`
++ Enter the name of the program that you want to debug. (e.g: `unwinding` , `hello` or `variable`)
 
 + Then enter how you want to inject: 
  
-	1 for injecting through L1 and L2 lines
+	`1` for injecting through L1 and L2 lines (you should also specify the name of the file. e.g: `stack_unwinding.cpp`)
  
-	2 for entering the name of function
+	`2` for entering the name of function (you should specify the name of the function in this format: `function`)
 
-+ you should type the name of function `tester`
-
-+ Then Enter the injection type, you have 3 options: **opcode, data, register**
++ Then Enter the injection type, you have 3 options: **Opcode, Data, Register**
 
 + Enter the number of error injections to be performed
-
-+ After the certain timeout the output will be printed 
-
 
 ### Debugging by entering the lines  
 + Enter the name of the program that you want to debug, you enter `stack_unwinding.cpp`
 
 + Then choose two lines for injecting, enter line number for Line1 and Line2
 
-+ You should enter the injection type (**opcode, data, register**)
++ You should enter the injection type (**Opcode, Data, Register**)
 
 + Enter the number of injections
 
 
 ### Output 
 
-You will get the responces of all the tests, these are the output options: 
+You will get the response of all the tests, these are the output columns: 
 
 
 | Option | Description |
 | ------ | ----------- |
 | tid   | Thread Id, to show the number of threads that were executing |
-| halt | 0 or 1, It is 1 if there is any halt, if we choose opcode as the injection type then program will enter to the hung mode |
-| duration    | Duration time for thread execution, 0 for less than 1 second |
+| halt | 0 or 1, It is 1 if there is any halt |
+| duration    | Duration time for thread execution (in seconds), 0 for less than 1 second |
 | sdc    | 0 or 1 if there is silent data corruption |
-| code, error, singno, no    | To show if the program is crashed or not, no field explains what is happend inside the program|
-| code:0, error:0, singno:0, no: Unknown signal    | if all the fields are 0 and no:Unknown signal, means the program executed successfuly |
-| code:1, error:1, singno: with different numbers, no: fault explanation    | program is not executed successfuly|
+| code, error, singno, no    | To show if the program has crashed or not. The `no` field explains what has happened inside the program|
+| code:0, error:0, singno:0, no: Unknown signal    | if all the fields are `0` and `no:Unknown signal`, means the program executed successfuly |
+| code:1, error:1, singno: with different numbers, no: fault explanation    | program has not executed successfuly|
 
 ## Screenshot of output 
 
