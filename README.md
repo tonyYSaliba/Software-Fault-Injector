@@ -39,34 +39,26 @@ classification of the error will be used to feed a Bayesian Model.
 Our debugger will support the following features:
 + Launch, halt, and continue execution
 + Set breakpoints on
-+ Memory addresses
-+ Source code lines
-+ Function entry
+	+ Memory addresses
+	+ Source code lines
+	+ Function entry
 + Read and write registers and memory
 + Single stepping
 + Instruction
-+ Step in
-+ Step out
-+ Step over
-+ Print current source location
-+ Print backtrace
-+ Print values of simple variables
-+ Multi-threaded debugging support
++ Find local variables and arguments
++ Multi-threaded and Multi-process debugging support
 
 #### Types of Errors 
 The runtime program will be injected through these types of errors:
-+ Opcode: causes crash or hung mode (infinite loop)
++ Opcode: causes crash or hang mode (infinite loop)
 + Data: causes SDC (Silent Data Corruption)
- 
++ Register: causes SDC, crash or hang mode
 
 
 ## Prerequisites 
 
 #### Working Environment 
 This software is carried out in C++. you can run it in Linux or Windows with C++ Compiler or Windows Subsystem for Linux (WSL)
-
-#### IDE
-Any IDE that compile c++ codes
 
 
 ## Getting Started
