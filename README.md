@@ -81,13 +81,20 @@ Go to the directory
 ```
 >> cd Software-Fault-Injector
 ```
-Then type this to build the project
+Create a directory for your build
+
+```
+>> mkdir dist
+>> cd dist
+```
+
+Then type this to create the make file
 
 ```
 >> cmake ../. 
 ```
 
-For creating make file 
+then type this to build the project
 ```
 >> make 
 ```
