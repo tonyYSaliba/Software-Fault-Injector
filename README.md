@@ -148,6 +148,10 @@ The sample output for Opcode injection
 
 ![Screenshot](https://i.ibb.co/2SGbF1C/output.jpg)
 
+### Chart 
+The sample output for Opcode injection
+
+![Screenshot](https://i.ibb.co/552sBf8/Chart.png")
 
 ## References
 
